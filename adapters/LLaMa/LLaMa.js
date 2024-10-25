@@ -1,3 +1,4 @@
+const CONSTANT = require('../constant');
 async function filterResponse(text){
     if (text.includes("off-limit") || text.includes("not able")|| text.includes("cannot")){
         return '';
@@ -63,22 +64,35 @@ async function askGeneralQuestion(generaalQuestion){
     return await askllama(messages, {temperature: 1});
     
 }
-async function askForComment(commentPrompt){
+async function askForComment(tweetText, character){
     const messages = [
-        {role:"system", content:"Your task is to generate a short, witty, and engaging Twitter-like comment, using popular internet slang and memes for a fun and relatable vibe, in response to a user-provided tweet. Please REPLY with the COMMENT only."},
-        {role: "user", content: commentPrompt}
+        {role:"system", content: CONSTANT.COMMENT_SYSTEM_PROMPT},
+        {role:"user", content: `Your character is ${character}`},
+        {role: "user", content: `You have read the following tweet: ${tweetText}`}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 45});
     return await filterResponse(response);
 }
 
-async function askForKeywords(keywordsPrompt){
+async function generateCharacter(){
+    const userCharacterPrompt = Math.random() < 0.5 ? CONSTANT.USER_CHARACTER_PROMPT : CONSTANT.USER_CHARACTER_PROMPT_2;
     const messages = [
-        {role:"system", content:"Please REPLY a KEYWORD based on the user request only."},
-        {role: "user", content: keywordsPrompt}
+        {role:"system", content: CONSTANT.CHARACTER_SYSTEM_PROMPT},
+        {role: "user", content: CONSTANT.BREIF_BG_INFO},
+        {role: "user", content: userCharacterPrompt}
+    ];
+    const response = await askllama(messages, {temperature: 1, num_predict: 45});
+    return await filterResponse(response);
+}
+
+async function askForKeywords(){
+    const messages = [
+        {role:"system", content: CONSTANT.KEYWORD_SYSTEM_PROMPT},
+        {role: "user", content: CONSTANT.BREIF_BG_INFO},
+        {role: "user", content: CONSTANT.USER_KEYWORD_PROMPT}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 10});
     return await filterResponse(response);
 }
 
-module.exports = { askllama, askGeneralQuestion, askForComment, askForKeywords };
+module.exports = { askllama, askGeneralQuestion, askForComment, askForKeywords, generateCharacter };

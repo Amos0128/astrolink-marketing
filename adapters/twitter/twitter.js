@@ -9,9 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const nlp = require('compromise');
-const e = require('express');
 const { Context } = require('../context/context');
-const { askGeneralQuestion, askForComment, askForKeywords } = require('../LLaMa/LLaMa');
+const { askGeneralQuestion, askForComment, askForKeywords, generateCharacter } = require('../LLaMa/LLaMa');
 /**
  * Twitter
  * @class
@@ -75,6 +74,7 @@ class Twitter extends Adapter {
    * 5. Queue twitterLogin()
    */
   negotiateSession = async () => {
+    await this.context.initializeContext();
     try {
       if (this.browser) {
         await this.browser.close();
@@ -1133,26 +1133,27 @@ class Twitter extends Adapter {
     * textToRead receives a blurb of text 
     @return => templated blurb
 */
+  async getCharacter(){
+      await this.context.initializeContext();
+      const contextCharacter = await this.context.getFromDB('Char-Info');
+      if (contextCharacter.length > 0){
+        return contextCharacter[0].info;
+      }else{
+        const character = await generateCharacter();
+        await this.context.addToDB('Char-Info', character);
+        return character;
+      }
+  }
 
   async genText(textToRead) {
     await this.context.initializeContext();
-    const contextInText = await this.context.getContext();
-    const purposePrompt = await this.purposePrompt();
+    // const contextInText = await this.context.getContext();
+    const character = await this.getCharacter();
     // const comment = await askForComment(contextInText + textToRead + purposePrompt);
-    const comment = await askForComment(textToRead + purposePrompt);
+    const comment = await askForComment(textToRead, character);
     return comment;
   }
-
-  /*
-    purpose-prompt
-    */
-  async purposePrompt() {
-    const purposes = [
-      'Generate a fun and positive comment, that will entice interactions from others. PLEASE REPLY THE COMMENT ONLY. YOU CAN USE TWITTER EMOJI! ',
-    ];
-    const randomPurpose = purposes[Math.floor(Math.random() * purposes.length)];
-    return randomPurpose;
-  }
+  
   /**
    * Attempts to return a sensible snippet from the provided text
    * @param {*} text
