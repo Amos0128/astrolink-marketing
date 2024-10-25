@@ -4,6 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const CONSTANT = require('../../adapters/constant');
+const { generateCharacter } = require('../LLaMa/LLaMa');
 dotenv.config();
 
 class Context {
@@ -62,6 +63,17 @@ class Context {
     //     await this.updateToDB('Char-Info', updated_info);
     //     await this.updateToDB('Char-Personality', updated_personality);
     // }
+    async getCharacter(){
+        await this.initializeContext();
+        const contextCharacter = await this.getFromDB('Char-Info');
+        if (contextCharacter.length > 0){
+          return contextCharacter[0].info;
+        }else{
+          const character = await generateCharacter();
+          await this.addToDB('Char-Info', character);
+          return character;
+        }
+    }
 
     async addToDB(type, info){
         const data = {type: type, info: info, timestamp: Date.now()};
@@ -107,5 +119,11 @@ class Context {
     // }
 
 }
-
+const context = new Context();
+async function test(){
+    await context.initializeContext();
+    const character = await context.getCharacter();
+    console.log(character);
+}
+test();
 module.exports = { Context };

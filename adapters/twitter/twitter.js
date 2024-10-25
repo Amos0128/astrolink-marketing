@@ -92,7 +92,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -1133,27 +1133,15 @@ class Twitter extends Adapter {
     * textToRead receives a blurb of text 
     @return => templated blurb
 */
-  async getCharacter(){
-      await this.context.initializeContext();
-      const contextCharacter = await this.context.getFromDB('Char-Info');
-      if (contextCharacter.length > 0){
-        return contextCharacter[0].info;
-      }else{
-        const character = await generateCharacter();
-        await this.context.addToDB('Char-Info', character);
-        return character;
-      }
-  }
+
 
   async genText(textToRead) {
     await this.context.initializeContext();
-    // const contextInText = await this.context.getContext();
-    const character = await this.getCharacter();
-    // const comment = await askForComment(contextInText + textToRead + purposePrompt);
+    const character = await this.context.getCharacter();
     const comment = await askForComment(textToRead, character);
     return comment;
   }
-  
+
   /**
    * Attempts to return a sensible snippet from the provided text
    * @param {*} text
