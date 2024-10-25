@@ -1,0 +1,70 @@
+# Name and metadata of your task
+task_name: 'Koii VIP Marketing AI'
+author: 'Amos'
+markdownDescriptionPath: "./markdown.md"
+description: ""
+repositoryUrl: 'https://github.com/koii-network/Koii-Marketing-AI'
+imageUrl: 'https://bafybeidm7ppamf2gfkcx542osdwgi7naeailheprqnjq2n3jz2fnkof57i.ipfs.w3s.link/AIMarketing.png'
+infoUrl: 'https://x.com/al_from_koii/status/1848790702186238018'
+
+# network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
+task_executable_network: 'IPFS'
+
+# Path to your executable webpack if the selected network is IPFS and in case of DEVELOPMENT  name it as main
+task_audit_program: 'dist/main.js'
+
+# Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
+round_time: 6000
+audit_window: 2500
+submission_window: 2500
+
+# Amounts in KOII
+minimum_stake_amount: 0.1
+
+# total_bounty_amount cannot be grater than bounty_amount_per_round
+# total bounty is not accepted in case of update task
+total_bounty_amount: 1000
+bounty_amount_per_round: 10
+
+#Number of times allowed to re-submit the distribution  list in case the distribution list is audited
+allowed_failed_distributions: 3
+
+#Space in MBs for the account size, that holds the task data
+space: 0.1
+
+# Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
+# To add more global variables and task variables, please refer the type,value,description format shown below
+
+requirementsTags:
+  - type: TASK_VARIABLE
+    value: 'TWITTER_USERNAME'
+    description: 'The username of your volunteer Twitter account. Please ensure your volunteer Twitter account has passed the Twitter verification process.'
+  - type: TASK_VARIABLE
+    value: 'TWITTER_PASSWORD'
+    description: 'The password of your volunteer Twitter account.'
+  - type: TASK_VARIABLE
+    value: 'TWITTER_VERIFICATION'
+    description: 'If verification is required, will use your email or phone number to login.'
+  - type: CPU
+    value: '4-core'
+  - type: RAM
+    value: '5 GB'
+  - type: STORAGE
+    value: '5 GB'
+
+## Task Bounty Type ##
+# KOII or KPL
+task_type: "KPL"
+
+## Token Mint Address (ONLY for KPL tasks) ##
+# The Fire Token address is provided as an example.
+token_type: "3kh898gitJDSb6b7MsntLqyUAvy3Y6D4PkMyGfinubht"
+
+tags: ['Social Posting']
+environment: 'PRODUCTION'
+
+# OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
+task_id: '3ZG3SFAD2jiahEFHGvdLG1jcZvQV5b4UJ3jLB1yAZmgs'
+
+# Provide the description for changes made in new version of task
+migrationDescription: 'Improved the context'
