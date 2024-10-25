@@ -9,13 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const nlp = require('compromise');
-const e = require('express');
 const { Context } = require('../context/context');
-const {
-  askGeneralQuestion,
-  askForComment,
-  askForKeywords,
-} = require('../LLaMa/LLaMa');
+const { askGeneralQuestion, askForComment, askForKeywords, generateCharacter } = require('../LLaMa/LLaMa');
 /**
  * Twitter
  * @class
@@ -79,6 +74,7 @@ class Twitter extends Adapter {
    * 5. Queue twitterLogin()
    */
   negotiateSession = async () => {
+    await this.context.initializeContext();
     try {
       if (this.browser) {
         await this.browser.close();
@@ -1138,25 +1134,14 @@ class Twitter extends Adapter {
     @return => templated blurb
 */
 
+
   async genText(textToRead) {
     await this.context.initializeContext();
-    const contextInText = await this.context.getContext();
-    const purposePrompt = await this.purposePrompt();
-    // const comment = await askForComment(contextInText + textToRead + purposePrompt);
-    const comment = await askForComment(textToRead + purposePrompt);
+    const character = await this.context.getCharacter();
+    const comment = await askForComment(textToRead, character);
     return comment;
   }
 
-  /*
-    purpose-prompt
-    */
-  async purposePrompt() {
-    const purposes = [
-      'Generate a fun and positive comment, that will entice interactions from others. PLEASE REPLY THE COMMENT ONLY. YOU CAN USE TWITTER EMOJI! ',
-    ];
-    const randomPurpose = purposes[Math.floor(Math.random() * purposes.length)];
-    return randomPurpose;
-  }
   /**
    * Attempts to return a sensible snippet from the provided text
    * @param {*} text
