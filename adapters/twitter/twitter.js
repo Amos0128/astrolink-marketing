@@ -538,7 +538,6 @@ class Twitter extends Adapter {
 
   clickArticle = async (currentPage, tweets_content, tweetId) => {
     console.log('Target article: ' + tweets_content + ' ' + tweetId);
-    await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2); // Avoid button overlay
     await currentPage.waitForTimeout(await this.randomDelay(2000));
 
     // Find the correct article container for the given tweetId or tweets_content
