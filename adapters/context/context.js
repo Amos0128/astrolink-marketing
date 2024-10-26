@@ -8,12 +8,13 @@ const { generateCharacter } = require('../LLaMa/LLaMa');
 dotenv.config();
 
 class Context {
-    db = null
+
     constructor(){
         this.db = null;
     }
     // Helper function to create the database
     async createDB(){
+
         if (process.env.DEV_MODE){
             this.db = new Datastore({ filename: path.join(__dirname, CONSTANT.CONTEXT_DB_NAME), autoload: true });
         }else{
@@ -119,11 +120,11 @@ class Context {
     // }
 
 }
-const context = new Context();
-async function test(){
-    await context.initializeContext();
-    const character = await context.getCharacter();
-    console.log(character);
-}
-test();
+// const context = new Context();
+// async function test(){
+//     await context.initializeContext();
+//     const character = await context.getCharacter();
+//     console.log(character);
+// }
+// test();
 module.exports = { Context };

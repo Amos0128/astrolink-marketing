@@ -78,7 +78,6 @@ async function generateCharacter(){
     const userCharacterPrompt = Math.random() < 0.5 ? CONSTANT.USER_CHARACTER_PROMPT : CONSTANT.USER_CHARACTER_PROMPT_2;
     const messages = [
         {role:"system", content: CONSTANT.CHARACTER_SYSTEM_PROMPT},
-        {role: "user", content: CONSTANT.BREIF_BG_INFO},
         {role: "user", content: userCharacterPrompt}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 45});
