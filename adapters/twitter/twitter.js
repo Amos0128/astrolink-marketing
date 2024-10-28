@@ -954,7 +954,7 @@ class Twitter extends Adapter {
       const saltRounds = 10;
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
-
+      await this.context.addToDB('Tweet-content', tweets_content);
       console.log('checking tweet: ', tweets_content);
       // click on article
       await this.clickArticle(currentPage, tweets_content, tweetId);
@@ -1052,6 +1052,7 @@ class Twitter extends Adapter {
           const $ = cheerio.load(comment);
           const commentText = $('div[data-testid="tweetText"]').text().trim(); // Get comment text
 
+          await this.context.addToDB('Tweet-content', commentText);
           // Check if the comment is already processed
           if (processedComments.has(commentText)) {
             // console.log('Skipping duplicate comment.');
