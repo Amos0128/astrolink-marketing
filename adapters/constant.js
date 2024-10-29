@@ -8,6 +8,13 @@ const CONSTANT = {
     USER_CHARACTER_PROMPT: `Please generate a character based in several keywords that likes Xiaomi in the background information. REPLY the KEYWORDS only.`,
     USER_CHARACTER_PROMPT_2: `Please generate a character based in several keywords that hates Xiaomi in the background information. REPLY the KEYWORDS only.`,
     USER_KEYWORD_PROMPT: `Please generate a KEYWORD for the background information. REPLY a KEYWORD only.`,
+    USER_CHARACTER_UPDATE_PROMPT:  `Please note that this is your previous character: `, 
+    USER_CHARACTER_UPDATE_PROMPT_2: `Please note that this is the sentences you've said today:  `,
+    USER_CHARACTER_UPDATE_PROMPT_3: `Please generate a new character based on the above information. REPLY the KEYWORDS only.`,
+    USER_TWEETS_INFO_UPDATE_PROMPT: `Please note that this is your previous knowledge: `,
+    USER_TWEETS_INFO_UPDATE_PROMPT_2: `Please note that this is the sentences you've said today: `,
+    USER_TWEETS_INFO_UPDATE_PROMPT_3: `Please generate a new knowledge based on the above information. REPLY the KEYWORDS only.`,
+
 }
 
 module.exports = CONSTANT;

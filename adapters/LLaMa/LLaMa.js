@@ -64,10 +64,12 @@ async function askGeneralQuestion(generaalQuestion){
     return await askllama(messages, {temperature: 1});
     
 }
-async function askForComment(tweetText, character){
+async function askForComment(tweetText, character, tweetsInfo){
+
     const messages = [
         {role:"system", content: CONSTANT.COMMENT_SYSTEM_PROMPT},
         {role:"user", content: `Your character is ${character}`},
+        {role:"user", content: `Your knowledge is ${tweetsInfo}`},
         {role: "user", content: `You have read the following tweet: ${tweetText}`}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 45});

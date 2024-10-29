@@ -1138,8 +1138,10 @@ class Twitter extends Adapter {
 
   async genText(textToRead) {
     await this.context.initializeContext();
-    const character = await this.context.getCharacter();
-    const comment = await askForComment(textToRead, character);
+    await this.context.checkUpdates();
+    const character = await this.context.getOrCreateCharacter();
+    const tweetsInfo = await this.context.getOrCreateTweetsInfo();
+    const comment = await askForComment(textToRead, character, tweetsInfo);
     return comment;
   }
 
