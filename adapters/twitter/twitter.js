@@ -703,7 +703,8 @@ class Twitter extends Adapter {
   clickCommentButton = async (currentPage, tweets_content) => {
     // write a comment and post
     console.log('Start genText *******************');
-    let genText = await this.genText(tweets_content);
+    let commentResponse = await this.genText(tweets_content);
+    let genText = commentResponse.reply;
     if (!genText) {
       return;
     }
@@ -798,6 +799,7 @@ class Twitter extends Adapter {
                 username: this.username,
                 commentId: tweetId,
                 commentText: genText,
+                comment_endpoint: commentResponse.endpoint || null
               };
               console.log('Found comment');
               // Store the current timestamp as the new 'LAST_COMMENT_MADE'
@@ -1142,8 +1144,7 @@ class Twitter extends Adapter {
     const character = await this.context.getOrCreateCharacter();
     const tweetsInfo = await this.context.getOrCreateTweetsInfo();
     const commentResponse = await askForComment(textToRead, character, tweetsInfo);
-    const comment = commentResponse.reply;
-    return comment;
+    return commentResponse;
   }
 
   /**
