@@ -120,7 +120,7 @@ class TwitterTask {
     } catch (error) {
       console.log('Error fetching keywords:, use random keyword');
       // pick random search term
-      let searchList = ['crypto', 'depin'];
+      let searchList = ['Ford and xiaomi'];
       search = searchList[Math.floor(Math.random() * searchList.length)];
     }
 

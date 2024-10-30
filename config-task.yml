@@ -1,11 +1,11 @@
 # Name and metadata of your task
-task_name: 'Marketing AI'
+task_name: 'Sofies Spark & Spread'
 author: 'Amos'
 markdownDescriptionPath: "./markdown.md"
-description: ""
-repositoryUrl: 'https://github.com/koii-network/Koii-Marketing-AI'
-imageUrl: 'https://bafybeidm7ppamf2gfkcx542osdwgi7naeailheprqnjq2n3jz2fnkof57i.ipfs.w3s.link/AIMarketing.png'
-infoUrl: 'https://x.com/al_from_koii/status/1848790702186238018'
+description: "This task aims to ignite sparks on emerging topics and, through the collaboration of intelligent nodes, spread these ideas to a broader audience. Participating nodes will automatically identify high-traffic content and engage in targeted interactions to enhance message visibility."
+repositoryUrl: 'https://github.com/Amos0128/test-my-code'
+imageUrl: 'https://bafybeidyykvg5yot2irikidnabkyzqjfh235tgpgp3ffe44nitjw6faepu.ipfs.w3s.link/task.png'
+infoUrl: 'https://x.com/James_Har0ld'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
 task_executable_network: 'IPFS'
@@ -23,8 +23,8 @@ minimum_stake_amount: 0.1
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 1000
-bounty_amount_per_round: 10
+total_bounty_amount: 9000
+bounty_amount_per_round: 100
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -58,13 +58,13 @@ task_type: "KPL"
 
 ## Token Mint Address (ONLY for KPL tasks) ##
 # The Fire Token address is provided as an example.
-token_type: "3kh898gitJDSb6b7MsntLqyUAvy3Y6D4PkMyGfinubht"
+token_type: "EErjDSPHmjz9ZipEtVoN54QzCjPvePBADvXcWKT659NW"
 
-tags: ['Social Posting']
+tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '3ZG3SFAD2jiahEFHGvdLG1jcZvQV5b4UJ3jLB1yAZmgs'
+task_id: '3tNofrbf7KxvrnTwieDDjV8SxLwQ8rvjhHFk4zfPmjCy'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Improved the context'
+migrationDescription: 'Fixed Headless Mode'

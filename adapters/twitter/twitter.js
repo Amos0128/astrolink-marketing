@@ -92,7 +92,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -451,14 +451,14 @@ class Twitter extends Adapter {
   humanType = async (page, selector, genText) => {
     // Focus on the input field
     await page.click(selector);
-  
+
     // Use Array.from to correctly handle emojis and surrogate pairs
     const characters = Array.from(genText);
-  
+
     for (let i = 0; i < characters.length; i++) {
       const char = characters[i];
       // console.log('Typing character:', char);
-  
+
       // Check if the character is an emoji or special character (non-ASCII)
       if (char.match(/[\u{1F600}-\u{1F6FF}]/u) || char.match(/[^\x00-\x7F]/)) {
         // Use page.type for emojis and other non-ASCII characters
@@ -477,17 +477,17 @@ class Twitter extends Adapter {
           await page.keyboard.press(char); // Press lowercase letters and other symbols
         }
       }
-  
+
       // Randomly vary typing speed to mimic human behavior
       const typingSpeed = Math.random() * 250 + 50;
       await page.waitForTimeout(typingSpeed);
-  
+
       // Randomly add "thinking pauses" after some words
       if (char === ' ' && Math.random() < 0.2) {
         const thinkingPause = Math.random() * 1500 + 500;
         await page.waitForTimeout(thinkingPause);
       }
-  
+
       // Randomly simulate small typing errors and corrections
       if (Math.random() < 0.08) {
         // 8% chance of error
@@ -498,20 +498,20 @@ class Twitter extends Adapter {
         await page.waitForTimeout(typingSpeed / 0.8); // Short delay after mistake
         await page.keyboard.press('Backspace'); // Correct the mistake
       }
-  
+
       // Randomly add a longer pause to mimic thinking (more rarely)
       if (Math.random() < 0.1) {
         const longPause = Math.random() * 2000 + 500;
         await page.waitForTimeout(longPause);
       }
     }
-  
+
     // Extra delay after finishing typing to simulate human thinking or reviewing
     const finishDelay = Math.random() * 2000 + 1000;
     console.log(
       `Finished typing. Waiting for additional mouse delay of ${finishDelay} ms`,
     );
-  
+
     // Simulate random mouse movement during the pause
     await page.waitForTimeout(finishDelay);
   };
@@ -538,7 +538,6 @@ class Twitter extends Adapter {
 
   clickArticle = async (currentPage, tweets_content, tweetId) => {
     console.log('Target article: ' + tweets_content + ' ' + tweetId);
-    await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2); // Avoid button overlay
     await currentPage.waitForTimeout(await this.randomDelay(2000));
 
     // Find the correct article container for the given tweetId or tweets_content
@@ -1376,7 +1375,32 @@ class Twitter extends Adapter {
       // hit enter
       await this.page.keyboard.press('Enter');
 
-      await this.page.waitForTimeout(await this.randomDelay(1000));
+      await this.page.waitForTimeout(await this.randomDelay(2000));
+
+      const latestSelector =
+        'div[role="presentation"] > a[role="tab"][href*="&f=live"]';
+
+      try {
+        await this.page.waitForSelector(latestSelector, { visible: true });
+
+        const LatestField = await this.page.$(latestSelector);
+
+        if (LatestField) {
+          const LatestBox = await LatestField.boundingBox();
+          if (LatestBox) {
+            await this.page.mouse.click(
+              LatestBox.x + LatestBox.width / 2 + this.getRandomOffset(5),
+              LatestBox.y + LatestBox.height / 2 + this.getRandomOffset(5),
+            );
+          }
+          console.log("Clicked on the 'Latest' tab");
+        }
+      } catch (error) {
+        console.error("Could not find or click on the 'Latest' tab:", error);
+      }
+
+      await this.page.waitForTimeout(await this.randomDelay(2000));
+
       console.log('fetching list for ', this.page.url());
 
       // error message
@@ -1391,13 +1415,9 @@ class Twitter extends Adapter {
         return false;
       });
 
-      await this.page.waitForTimeout(await this.randomDelay(4500));
-      await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
       console.log('Waiting for tweets loaded');
-      // await this.page.waitForNavigation({ waitUntil: 'networkidle2' });
-      await this.page.waitForTimeout(await this.randomDelay(4000));
-      await this.slowFingerSlide(this.page, 150, 200, 250, 500, 5, 5);
-      await this.page.waitForTimeout(await this.randomDelay(1000));
+      await this.page.waitForTimeout(await this.randomDelay(4500));
+
       // get the articles
       const items = await this.page.evaluate(() => {
         const elements = document.querySelectorAll('article[aria-labelledby]');
