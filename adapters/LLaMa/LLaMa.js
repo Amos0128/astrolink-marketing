@@ -35,35 +35,35 @@ async function askllama(messages, options) {
             console.log("REPLY HERE"); 
             console.log(reply);
             if (!reply) continue;
-            return reply;
+            return {reply: reply, endpoint: randomEndpoint};
         } catch (error) {
             console.log(error);
         }
     }
-    // if no reply from any endpoint, try the default one
-    // const accessLink = "https://vps-tasknet.koii.network/task/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM";
-    // const response = await fetch(`${accessLink}/ask-query`, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' }, 
-    //     body: JSON.stringify({ model: "koiiLlama", messages: messages, options: options }) 
-    //   });
-    // try{
-    //     const data = await response.json();
-    //     const reply = data.reply;   
-    //     console.log(reply);
-    //     if (!reply) return "";
-    //     return reply;
-    // } catch (error) {
-    //     console.log(error);
-    //     return "";
-    // }
+    //if no reply from any endpoint, try the default one
+    const accessLink = "https://vps-tasknet.koii.network/task/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM";
+    const response = await fetch(`${accessLink}/ask-query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ model: "koiiLlama", messages: messages, options: options }) 
+      });
+    try{
+        const data = await response.json();
+        const reply = data.reply;   
+        console.log(reply);
+        if (!reply) return "";
+        return reply;
+    } catch (error) {
+        console.log(error);
+        return "";
+    }
 }
 async function askGeneralQuestion(generaalQuestion){
     const messages = [
         {role: "user", content: generaalQuestion}
     ]; 
-    return await askllama(messages, {temperature: 1});
-    
+    const response = await askllama(messages, {temperature: 1});
+    return response;
 }
 async function askForComment(tweetText, character, tweetsInfo){
     
@@ -74,7 +74,8 @@ async function askForComment(tweetText, character, tweetsInfo){
         {role: "user", content: `You have read the following tweet: ${tweetText}`}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 45});
-    return await filterResponse(response);
+    const reply = await filterResponse(response.reply);
+    return {reply: reply, endpoint: response.endpoint};
 }
 
 async function generateCharacter(){
@@ -84,7 +85,8 @@ async function generateCharacter(){
         {role: "user", content: userCharacterPrompt}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 45});
-    return await filterResponse(response);
+    const reply = await filterResponse(response.reply);
+    return {reply: reply, endpoint: response.endpoint};
 }
 
 async function askForKeywords(){
@@ -94,7 +96,8 @@ async function askForKeywords(){
         {role: "user", content: CONSTANT.USER_KEYWORD_PROMPT}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 10});
-    return await filterResponse(response);
+    const reply = await filterResponse(response.reply);
+    return {reply: reply, endpoint: response.endpoint};
 }
 
 module.exports = { askllama, askGeneralQuestion, askForComment, askForKeywords, generateCharacter };

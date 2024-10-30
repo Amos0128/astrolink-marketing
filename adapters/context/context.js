@@ -43,7 +43,8 @@ class Context {
         const currentCharInfo = await this.getOrCreateCharacter();
         const todayGenText = await this.getFromDBWithTimestamp('Daily-GenText', 24);
         const updatePrompt = CONSTANT.USER_CHARACTER_UPDATE_PROMPT + currentCharInfo + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_2 + todayGenText.map(item => item.info).join('\n') + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_3;
-        const updatedCharInfo = await askGeneralQuestion(updatePrompt);
+        const response = await askGeneralQuestion(updatePrompt);
+        const updatedCharInfo = response.reply;
         await this.updateToDB('Char-Info', updatedCharInfo);
     }
 
@@ -51,7 +52,8 @@ class Context {
         const currentTweetsInfo = await this.getFromDB('Char-TweetsInfo');
         const todayTweetsInfo = await this.getFromDBWithTimestamp('Tweet-content', 24);
         const updatePrompt = CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfo + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfo.map(item => item.info).join('\n') + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
-        const updatedTweetsInfo = await askGeneralQuestion(updatePrompt);
+        const response = await askGeneralQuestion(updatePrompt);
+        const updatedTweetsInfo = response.reply;
         await this.updateToDB('Char-TweetsInfo', updatedTweetsInfo);
     }
 
@@ -61,9 +63,10 @@ class Context {
         if (contextCharacter.length > 0){
           return contextCharacter[0].info;
         }else{
-          const character = await generateCharacter();
-          await this.addToDB('Char-Info', character);
-          return character;
+        const response = await generateCharacter();
+        const character = response.reply;
+        await this.addToDB('Char-Info', character);
+        return character;
         }
     }
     async getOrCreateTweetsInfo(){
