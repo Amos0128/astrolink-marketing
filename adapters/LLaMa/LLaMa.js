@@ -1,6 +1,6 @@
 const CONSTANT = require('../constant');
 async function filterResponse(text){
-    if (text.includes("off-limit") || text.includes("not able")|| text.includes("cannot")){
+    if (text.includes("off-limit") || text.includes("not able")|| text.includes("cannot")|| text.includes("can't")){
         return '';
     }
     const filteredText = text.replace(/"/g, '');
@@ -16,6 +16,7 @@ async function getEndpoints(){
     return endpointsList;
 }
 async function askllama(messages, options) {
+    console.log("messages", messages);
     const endpoints = await getEndpoints();
     console.log(endpoints);
     // shuffle the endpoints
@@ -65,7 +66,7 @@ async function askGeneralQuestion(generaalQuestion){
     
 }
 async function askForComment(tweetText, character, tweetsInfo){
-
+    
     const messages = [
         {role:"system", content: CONSTANT.COMMENT_SYSTEM_PROMPT},
         {role:"user", content: `Your character is ${character}`},
