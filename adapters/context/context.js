@@ -52,27 +52,20 @@ class Context {
     }
 
     async updateTweetsInfo(){
+        let updatePrompt = "";
         const currentTweetsInfo = await this.getFromDB('Char-TweetsInfo');
-        console.log("currentTweetsInfo");
-        console.log(currentTweetsInfo);
-        if (currentTweetsInfo.length == 0){
-            return;
-        }
         const currentTweetsInfoStr = currentTweetsInfo.map(item => item.info).join('\n');
-        if (currentTweetsInfoStr == ""){
-            return;
+        if (!currentTweetsInfoStr == ""){
+            updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfoStr
         }
         const todayTweetsInfo = await this.getFromDBWithTimestamp('Tweet-content', 24);
-        console.log("todayTweetsInfo");
-        console.log(todayTweetsInfo);
-        if (todayTweetsInfo.length == 0){
-            return;
-        }
+
+
         const todayTweetsInfoStr = todayTweetsInfo.map(item => item.info).join('\n');
-        if (todayTweetsInfoStr == ""){
-            return;
+        if (!todayTweetsInfoStr == ""){
+            updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfoStr;
         }
-        const updatePrompt = CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfoStr + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfoStr + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
+        updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
         const response = await askGeneralQuestion(updatePrompt);
         const updatedTweetsInfo = response.reply;
         await this.updateToDB('Char-TweetsInfo', updatedTweetsInfo);
