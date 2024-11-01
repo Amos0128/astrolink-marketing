@@ -48,6 +48,8 @@ class Context {
         const updatePrompt = CONSTANT.USER_CHARACTER_UPDATE_PROMPT + currentCharInfo + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_2 + todayGenTextStr + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_3;
         const response = await askGeneralQuestion(updatePrompt);
         const updatedCharInfo = response.reply;
+        console.log("updatedCharInfo");
+        console.log(updatedCharInfo);
         await this.updateToDB('Char-Info', updatedCharInfo);
     }
 
@@ -59,8 +61,6 @@ class Context {
             updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfoStr
         }
         const todayTweetsInfo = await this.getFromDBWithTimestamp('Tweet-content', 24);
-
-
         const todayTweetsInfoStr = todayTweetsInfo.map(item => item.info).join('\n');
         if (!todayTweetsInfoStr == ""){
             updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfoStr;
@@ -68,6 +68,8 @@ class Context {
         updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
         const response = await askGeneralQuestion(updatePrompt);
         const updatedTweetsInfo = response.reply;
+        console.log("updatedTweetsInfo");
+        console.log(updatedTweetsInfo);
         await this.updateToDB('Char-TweetsInfo', updatedTweetsInfo);
     }
 
