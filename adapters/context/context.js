@@ -42,6 +42,7 @@ class Context {
         const currentCharInfo = await this.getOrCreateCharacter();
         const todayGenText = await this.getFromDBWithTimestamp('Daily-GenText', 24);
         if (todayGenText.length == 0){
+            console.log("Retrieved charinfo but no todayGenText");
             return;
         }
         const todayGenTextStr = todayGenText.map(item => item.info).join('\n');
