@@ -14,7 +14,6 @@ class Context {
     }
     // Helper function to create the database
     async createDB(){
-
         if (process.env.DEV_MODE){
             this.db = new Datastore({ filename: path.join(__dirname, CONSTANT.CONTEXT_DB_NAME), autoload: true });
         }else{
@@ -54,15 +53,25 @@ class Context {
 
     async updateTweetsInfo(){
         const currentTweetsInfo = await this.getFromDB('Char-TweetsInfo');
+        console.log("currentTweetsInfo");
+        console.log(currentTweetsInfo);
         if (currentTweetsInfo.length == 0){
             return;
         }
         const currentTweetsInfoStr = currentTweetsInfo.map(item => item.info).join('\n');
+        if (currentTweetsInfoStr == ""){
+            return;
+        }
         const todayTweetsInfo = await this.getFromDBWithTimestamp('Tweet-content', 24);
+        console.log("todayTweetsInfo");
+        console.log(todayTweetsInfo);
         if (todayTweetsInfo.length == 0){
             return;
         }
         const todayTweetsInfoStr = todayTweetsInfo.map(item => item.info).join('\n');
+        if (todayTweetsInfoStr == ""){
+            return;
+        }
         const updatePrompt = CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfoStr + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfoStr + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
         const response = await askGeneralQuestion(updatePrompt);
         const updatedTweetsInfo = response.reply;
@@ -73,8 +82,12 @@ class Context {
         await this.initializeContext();
         const contextCharacter = await this.getFromDB('Char-Info');
         if (contextCharacter.length > 0){
-          return contextCharacter[0].info;
+            console.log("RETRIEVED CHARACTER");
+            const character = contextCharacter[0].info;
+            console.log(character);
+            return character;
         }else{
+            console.log("GENERATED CHARACTER");
             const response = await generateCharacter();
             const character = response.reply;
             await this.addToDB('Char-Info', character);
