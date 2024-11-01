@@ -24,12 +24,13 @@ async function askllama(messages, options) {
     for (let i = 0; i < shuffledEndpoints.length; i++) {
         const randomEndpoint = shuffledEndpoints[i];
         const accessLink = randomEndpoint + "/task/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM";
-        const response = await fetch(`${accessLink}/ask-query`, {
-            method: 'POST',
+        try{
+            const response = await fetch(`${accessLink}/ask-query`, {
+                method: 'POST',
             headers: { 'Content-Type': 'application/json' }, 
             body: JSON.stringify({ model: "koiiLlama", messages: messages, options: options }) 
           });
-        try{
+       
             const data = await response.json();
             const reply = data.reply;  
             console.log("REPLY HERE"); 
