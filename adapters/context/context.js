@@ -42,7 +42,11 @@ class Context {
     async updateCharInfo(){
         const currentCharInfo = await this.getOrCreateCharacter();
         const todayGenText = await this.getFromDBWithTimestamp('Daily-GenText', 24);
-        const updatePrompt = CONSTANT.USER_CHARACTER_UPDATE_PROMPT + currentCharInfo + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_2 + todayGenText.map(item => item.info).join('\n') + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_3;
+        if (todayGenText.length == 0){
+            return;
+        }
+        const todayGenTextStr = todayGenText.map(item => item.info).join('\n');
+        const updatePrompt = CONSTANT.USER_CHARACTER_UPDATE_PROMPT + currentCharInfo + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_2 + todayGenTextStr + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_3;
         const response = await askGeneralQuestion(updatePrompt);
         const updatedCharInfo = response.reply;
         await this.updateToDB('Char-Info', updatedCharInfo);
@@ -50,8 +54,16 @@ class Context {
 
     async updateTweetsInfo(){
         const currentTweetsInfo = await this.getFromDB('Char-TweetsInfo');
+        if (currentTweetsInfo.length == 0){
+            return;
+        }
+        const currentTweetsInfoStr = currentTweetsInfo.map(item => item.info).join('\n');
         const todayTweetsInfo = await this.getFromDBWithTimestamp('Tweet-content', 24);
-        const updatePrompt = CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfo + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfo.map(item => item.info).join('\n') + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
+        if (todayTweetsInfo.length == 0){
+            return;
+        }
+        const todayTweetsInfoStr = todayTweetsInfo.map(item => item.info).join('\n');
+        const updatePrompt = CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT + currentTweetsInfoStr + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfoStr + CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
         const response = await askGeneralQuestion(updatePrompt);
         const updatedTweetsInfo = response.reply;
         await this.updateToDB('Char-TweetsInfo', updatedTweetsInfo);
@@ -63,10 +75,10 @@ class Context {
         if (contextCharacter.length > 0){
           return contextCharacter[0].info;
         }else{
-        const response = await generateCharacter();
-        const character = response.reply;
-        await this.addToDB('Char-Info', character);
-        return character;
+            const response = await generateCharacter();
+            const character = response.reply;
+            await this.addToDB('Char-Info', character);
+            return character;
         }
     }
     async getOrCreateTweetsInfo(){
@@ -90,13 +102,21 @@ class Context {
 
     async checkUpdates(){
         const contextTweetsInfo = await this.getFromDB('Char-TweetsInfo');
+        const contextCharacter = await this.getFromDB('Char-Info');
+        if (process.env.DEV_MODE){
+            console.log("DEV_MODE on")
+            await this.updateTweetsInfo();
+            await this.updateCharInfo();
+            return;
+        }
         if (contextTweetsInfo.length > 0 && contextTweetsInfo[0].timestamp > Date.now() - 24 * 60 * 60 * 1000){
             await this.updateTweetsInfo();
         }
-        const contextCharacter = await this.getFromDB('Char-Info');
+        
         if (contextCharacter.length > 0 && contextCharacter[0].timestamp > Date.now() - 24 * 60 * 60 * 1000){
             await this.updateCharInfo();
         }
+
     }
 
     async updateToDB(type, info){

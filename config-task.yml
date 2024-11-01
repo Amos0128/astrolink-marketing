@@ -64,7 +64,7 @@ tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '9vbXTQZdRUFKikoCaxLrzRvD2DcwqwSuJRdGG3TSPb8B'
+task_id: 'GZfCXzZ7nfxaA8YvGoyWvSSDEd8b2KgT6TeTEazST2VX'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Fixed Try Catch'
