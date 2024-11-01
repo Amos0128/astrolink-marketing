@@ -13,6 +13,12 @@ async function getEndpoints(){
     const endpoints = await fetch("https://vps-tasknet.koii.network/nodes/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM")
     const endpointsList = (await endpoints.json()).map(node => node.data.url);
     console.log(endpointsList);
+    for (let i = 0; i < endpointsList.length; i++){
+        // if endpoint contains :5644, we need to make sure it is http:// not https://
+        if (endpointsList[i].includes(":5644")){
+            endpointsList[i] = endpointsList[i].replace("https://", "http://");
+        }
+    }
     return endpointsList;
 }
 async function askllama(messages, options) {
@@ -83,6 +89,7 @@ async function generateCharacter(){
     const userCharacterPrompt = Math.random() < 0.5 ? CONSTANT.USER_CHARACTER_PROMPT : CONSTANT.USER_CHARACTER_PROMPT_2;
     const messages = [
         {role:"system", content: CONSTANT.CHARACTER_SYSTEM_PROMPT},
+        {role: "user", content: CONSTANT.BREIF_BG_INFO},
         {role: "user", content: userCharacterPrompt}
     ];
     const response = await askllama(messages, {temperature: 1, num_predict: 45});
