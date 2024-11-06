@@ -653,7 +653,7 @@ class Twitter extends Adapter {
 
       const isButtonVisible = async box => {
         const viewport = await currentPage.viewport();
-        return box && box.y >= 0 && box.y + box.height <= viewport.height;
+        return box && box.y >= 0 && box.y + box.height <= viewport.height - 100;
       };
 
       // Scroll until the like button is within the viewport
@@ -719,31 +719,33 @@ class Twitter extends Adapter {
 
     await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2); // Avoid button overlay
     const replybuttonSelector = 'button[data-testid="reply"]'; // Selector for the reply button
-    await currentPage.waitForSelector(replybuttonSelector, {
-      timeout: 10000,
-    });
+
+    // Wait for the reply button selector to appear on the page
+    await currentPage.waitForSelector(replybuttonSelector, { timeout: 10000 });
     await currentPage.waitForTimeout(await this.randomDelay(2000));
-
-    // Find the first reply button
-    const replyButton = await currentPage.$(replybuttonSelector); // Gets the first instance of the reply button
-
+    
+    // Find all instances of the reply button
+    const replyButtons = await currentPage.$$(replybuttonSelector);
+    
+    // Select the second reply button if there are at least two
+    const replyButton = replyButtons.length >= 1 ? replyButtons[1] : replyButtons[0];
+    
     if (replyButton) {
       const replybuttonBox = await replyButton.boundingBox();
-
+    
       if (replybuttonBox) {
-        // Click around the button with random offsets
+        // Click on the button with random offsets
+        console.log("Clicking on reply button");
         await currentPage.mouse.click(
           replybuttonBox.x + replybuttonBox.width / 2 + this.getRandomOffset(5),
-          replybuttonBox.y +
-            replybuttonBox.height / 2 +
-            this.getRandomOffset(5),
+          replybuttonBox.y + replybuttonBox.height / 2 + this.getRandomOffset(5)
         );
       } else {
         console.log('Button is not visible.');
         return false;
       }
     } else {
-      console.log('Reply button not found.');
+      console.log('No reply button found.');
       return false;
     }
 
@@ -1356,7 +1358,7 @@ class Twitter extends Adapter {
       // Wait for the input element to be visible
       await this.page.waitForSelector(searchInputSelector, { visible: true });
 
-      const searchInputField = await this.page.$(searchInputSelector);
+      let searchInputField = await this.page.$(searchInputSelector);
 
       if (searchInputField) {
         const inputBox = await searchInputField.boundingBox();
@@ -1434,7 +1436,7 @@ class Twitter extends Adapter {
         return Array.from(elements).map(element => element.outerHTML);
       });
       console.log('Found items: ', items.length);
-
+      await this.page.waitForTimeout(await this.randomDelay(3000));
       // loop the articles
       for (const item of items) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // @soma Nice delay timer, never thought of doing it this way
@@ -1477,13 +1479,100 @@ class Twitter extends Adapter {
         }
       }
 
-      console.log('Time to take a break');
+      if (exploreLink) {
+        const linkBox = await exploreLink.boundingBox();
+
+        if (linkBox) {
+          // Simulate a click on the link using mouse.click with random offsets
+          await this.page.mouse.click(
+            linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
+            linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
+          );
+          await this.page.waitForTimeout(await this.randomDelay(3000));
+          if (this.page.url().includes('explore')) {
+            console.log('Explore link clicked successfully!');
+          } else {
+            // retry click
+            await this.page.mouse.click(
+              linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
+              linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
+            );
+            await this.page.waitForTimeout(await this.randomDelay(3000));
+            if (this.page.url().includes('explore')) {
+              console.log('Explore link clicked successfully!');
+            }
+          }
+        } else {
+          console.log('Link bounding box not available.');
+        }
+      } else {
+        console.log('Explore link not found.');
+      }
+
+      await this.page.waitForTimeout(await this.randomDelay(3000));
 
       // Call the function to perform the slow slide
       await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 5);
 
+      // Follow user
+      await this.page.waitForTimeout(await this.randomDelay(3000));
+
+      // Define the selector for the follow button based on the given data-testid
+      const followButtonSelector = 'button[data-testid*="-follow"]';
+
+      // Wait for the follow button to be visible
+      await this.page.waitForSelector(followButtonSelector, { visible: true });
+
+      // Locate the follow button within the page
+      let followButton = await this.page.$(followButtonSelector);
+
+      if (followButton) {
+        let buttonBox = await followButton.boundingBox();
+
+        // Function to check if the button is in the viewport
+        const isButtonVisible = async box => {
+          const viewport = await this.page.viewport();
+          console.log(box);
+          return (
+            box && box.y >= 0 && box.y + box.height <= viewport.height - 300
+          );
+        };
+
+        // Scroll until the button is fully visible
+        while (!(await isButtonVisible(buttonBox))) {
+          const viewport = await this.page.viewport();
+          const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
+
+          const startY = 500;
+          const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
+
+          if (scrollAmount <= 0) break;
+
+          await this.slowFingerSlide(this.page, 150, startY, 150, endY, 50, 20);
+          await this.page.waitForTimeout(await this.randomDelay(2000));
+          // Check if the button has become visible
+          buttonBox = await followButton.boundingBox();
+        }
+
+        // Check if bounding box is available and click the center of the button with random offsets
+        if (buttonBox) {
+          await this.page.mouse.click(
+            buttonBox.x + buttonBox.width / 2 + this.getRandomOffset(5),
+            buttonBox.y + buttonBox.height / 2 + this.getRandomOffset(5),
+          );
+
+          console.log('Follow button clicked successfully.');
+        } else {
+          console.log('Follow button bounding box not available.');
+        }
+      } else {
+        console.log('Follow button not found.');
+      }
+
+      console.log('Time to take a break');
+
       // Optional: wait for a moment to allow new elements to load
-      await this.page.waitForTimeout(await this.randomDelay(2000));
+      await this.page.waitForTimeout(await this.randomDelay(20000000));
       this.browser.close();
       return;
     } catch (e) {
