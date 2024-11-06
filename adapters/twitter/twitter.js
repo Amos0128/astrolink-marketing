@@ -10,7 +10,12 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const nlp = require('compromise');
 const { Context } = require('../context/context');
-const { askGeneralQuestion, askForComment, askForKeywords, generateCharacter } = require('../LLaMa/LLaMa');
+const {
+  askGeneralQuestion,
+  askForComment,
+  askForKeywords,
+  generateCharacter,
+} = require('../LLaMa/LLaMa');
 /**
  * Twitter
  * @class
@@ -92,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -554,7 +559,7 @@ class Twitter extends Adapter {
 
     let textContentContainer = await articleContainer.$(
       'div[data-testid="tweetText"]',
-    ); // Target the text content specifically
+    );
 
     if (!textContentContainer) {
       console.log('Text content container not found in the article.');
@@ -563,44 +568,46 @@ class Twitter extends Adapter {
 
     let textBox = await textContentContainer.boundingBox();
 
-    // Function to check if the article is within the visible viewport
     const isVisible = async box => {
       const viewport = await currentPage.viewport();
       return box && box.y >= 0 && box.y + box.height <= viewport.height;
     };
 
-    // Scroll until the text content is within the viewport
     while (!(await isVisible(textBox))) {
       const viewport = await currentPage.viewport();
       const scrollAmount = Math.max(0, textBox.y - viewport.height / 2);
-
-      const startY = 500; // starting position for swipe (bottom)
-      const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
+      const startY = 500;
+      const endY = startY - scrollAmount - 50;
 
       if (scrollAmount <= 0) break;
 
       await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 60, 10);
       await currentPage.waitForTimeout(await this.randomDelay(2000));
 
-      textBox = await textContentContainer.boundingBox(); // Re-evaluate the text container's position after scrolling
+      textBox = await textContentContainer.boundingBox();
     }
 
-    // Once the text content is in view, simulate a click
     if (textBox) {
-      await currentPage.mouse.click(
-        textBox.x + textBox.width / 2 + this.getRandomOffset(20),
-        textBox.y + textBox.height / 2 + this.getRandomOffset(2),
-      );
+      try {
+        // Attempt to click the element using elementHandle.click()
+        await textContentContainer.click();
+        console.log('Text content clicked successfully.');
+      } catch (clickError) {
+        console.log(
+          'elementHandle.click() failed, attempting backup click with evaluate.',
+        );
+
+        await currentPage.evaluate(el => el.click(), textContentContainer);
+        console.log('Backup evaluate click executed.');
+      }
 
       await currentPage.waitForTimeout(await this.randomDelay(2000));
 
-      // Check if clicking opened a photo by mistake (URL changes to include `/photo/`)
       const currentUrl = currentPage.url();
       if (currentUrl.includes('/photo/')) {
         console.log('Photo was clicked by mistake. Closing the photo.');
 
-        // Close the photo (usually by clicking a "close" button or pressing ESC)
-        const closeButtonSelector = 'div[role="button"][aria-label="Close"]'; // Example selector for a close button
+        const closeButtonSelector = 'div[role="button"][aria-label="Close"]';
         const closeButton = await currentPage.$(closeButtonSelector);
 
         if (closeButton) {
@@ -609,10 +616,7 @@ class Twitter extends Adapter {
 
           // Retry clicking the text content container
           console.log('Retrying to click the text content of the article.');
-          await currentPage.mouse.click(
-            textBox.x + textBox.width / 2 + this.getRandomOffset(20),
-            textBox.y + textBox.height / 2 + this.getRandomOffset(2),
-          );
+          await textContentContainer.click();
           console.log(
             'Text content clicked successfully after closing the photo.',
           );
@@ -620,7 +624,7 @@ class Twitter extends Adapter {
           console.log(
             'Could not find close button for the photo. Trying to close with ESC key.',
           );
-          await currentPage.keyboard.press('Escape'); // Fallback: Press the ESC key to close the photo modal
+          await currentPage.keyboard.press('Escape');
         }
       } else if (currentUrl.includes(tweetId)) {
         console.log(
@@ -634,19 +638,19 @@ class Twitter extends Adapter {
 
   clickLikeButton = async (currentPage, commentContainer) => {
     try {
-      const buttonSelector = 'button[data-testid="like"]'; // Find the like button within the specific comment container
-      const likeButton = await commentContainer.$(buttonSelector); // Use container.$ to scope the search inside the comment
+      const buttonSelector = 'button[data-testid="like"]';
+      const likeButton = await commentContainer.$(buttonSelector);
 
       if (!likeButton) {
         console.log('Post already liked.');
         return;
       }
 
-      await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2); // Avoid button overlay
+      // await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2);
       await currentPage.waitForTimeout(await this.randomDelay(2000));
+
       let buttonBox = await likeButton.boundingBox();
 
-      // Function to check if the button is visible within the viewport
       const isButtonVisible = async box => {
         const viewport = await currentPage.viewport();
         return box && box.y >= 0 && box.y + box.height <= viewport.height;
@@ -655,25 +659,24 @@ class Twitter extends Adapter {
       // Scroll until the like button is within the viewport
       while (!(await isButtonVisible(buttonBox))) {
         const viewport = await currentPage.viewport();
+
         const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
 
-        const startY = 500;
-        const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
+        const startY = 650;
+        const endY = startY - scrollAmount;
 
         if (scrollAmount <= 0) break;
 
-        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
+        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 70, 10);
         await currentPage.waitForTimeout(await this.randomDelay(2000));
 
-        buttonBox = await likeButton.boundingBox(); // Recalculate bounding box after scroll
+        buttonBox = await likeButton.boundingBox();
       }
 
-      // Check if the like button is now visible and clickable
       const isLikeButtonVisible =
         buttonBox && (await isButtonVisible(buttonBox));
-
+      // console.log(buttonBox, await isButtonVisible(buttonBox));
       if (isLikeButtonVisible) {
-        // Now check if the "unlike" button is present but scope it to the comment container
         const unlikeButtonSelector = 'button[data-testid="unlike"]';
         const isUnlike = await commentContainer.$(unlikeButtonSelector);
 
@@ -682,13 +685,16 @@ class Twitter extends Adapter {
             'Post is already liked (unlike button present). No action taken.',
           );
         } else {
-          // Click the like button
           await currentPage.waitForTimeout(await this.randomDelay(1000));
-          await currentPage.mouse.click(
-            buttonBox.x + buttonBox.width / 2 + this.getRandomOffset(5),
-            buttonBox.y + buttonBox.height / 2 + this.getRandomOffset(5),
-          );
-          // console.log('Like button clicked successfully.');
+          try {
+            await likeButton.click(); // Attempt direct click on the like button
+            console.log('Like button clicked successfully.');
+          } catch (clickError) {
+            console.log('Direct click failed, trying fallback with evaluate.');
+
+            await currentPage.evaluate(el => el.click(), likeButton);
+            console.log('Fallback evaluate click executed.');
+          }
           await currentPage.waitForTimeout(await this.randomDelay(2000));
         }
       } else {
@@ -798,7 +804,7 @@ class Twitter extends Adapter {
                 username: this.username,
                 commentId: tweetId,
                 commentText: genText,
-                comment_endpoint: commentResponse.endpoint || null
+                comment_endpoint: commentResponse.endpoint || null,
               };
               console.log('Found comment');
               // Store the current timestamp as the new 'LAST_COMMENT_MADE'
@@ -857,13 +863,9 @@ class Twitter extends Adapter {
       );
       const extractedTweetId = tweetUrl.split('/').pop();
 
-      // You can also check the tweet content if needed
-      const tweetText = await article.$eval(
-        'div[data-testid="tweetText"]',
-        el => el.innerText,
-      );
+      // console.log(extractedTweetId, tweetId);
 
-      if (extractedTweetId === tweetId || tweetText.includes(tweets_content)) {
+      if (extractedTweetId === tweetId) {
         return article; // Return the article container that matches the tweetId or content
       }
     }
@@ -1136,13 +1138,16 @@ class Twitter extends Adapter {
     @return => templated blurb
 */
 
-
   async genText(textToRead) {
     await this.context.initializeContext();
     await this.context.checkUpdates();
     const character = await this.context.getOrCreateCharacter();
     const tweetsInfo = await this.context.getOrCreateTweetsInfo();
-    const commentResponse = await askForComment(textToRead, character, tweetsInfo);
+    const commentResponse = await askForComment(
+      textToRead,
+      character,
+      tweetsInfo,
+    );
     return commentResponse;
   }
 
@@ -1447,7 +1452,7 @@ class Twitter extends Adapter {
           }
 
           // check if comment found or not
-          if (data.tweets_id !== undefined || data.tweets_id !== null) {
+          if (!data.tweets_id) {
             let checkItem = {
               id: data.tweets_id,
             };
