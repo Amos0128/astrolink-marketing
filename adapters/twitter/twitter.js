@@ -718,31 +718,33 @@ class Twitter extends Adapter {
 
     await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2); // Avoid button overlay
     const replybuttonSelector = 'button[data-testid="reply"]'; // Selector for the reply button
-    await currentPage.waitForSelector(replybuttonSelector, {
-      timeout: 10000,
-    });
+
+    // Wait for the reply button selector to appear on the page
+    await currentPage.waitForSelector(replybuttonSelector, { timeout: 10000 });
     await currentPage.waitForTimeout(await this.randomDelay(2000));
-
-    // Find the first reply button
-    const replyButton = await currentPage.$(replybuttonSelector); // Gets the first instance of the reply button
-
+    
+    // Find all instances of the reply button
+    const replyButtons = await currentPage.$$(replybuttonSelector);
+    
+    // Select the second reply button if there are at least two
+    const replyButton = replyButtons.length >= 1 ? replyButtons[1] : replyButtons[0];
+    
     if (replyButton) {
       const replybuttonBox = await replyButton.boundingBox();
-
+    
       if (replybuttonBox) {
-        // Click around the button with random offsets
-        console.log("click on reply button")
+        // Click on the button with random offsets
+        console.log("Clicking on reply button");
         await currentPage.mouse.click(
-          replybuttonBox.x + replybuttonBox.width / 2,
-          replybuttonBox.y +
-            replybuttonBox.height / 2,
+          replybuttonBox.x + replybuttonBox.width / 2 + this.getRandomOffset(5),
+          replybuttonBox.y + replybuttonBox.height / 2 + this.getRandomOffset(5)
         );
       } else {
         console.log('Button is not visible.');
         return false;
       }
     } else {
-      console.log('Reply button not found.');
+      console.log('No reply button found.');
       return false;
     }
 
