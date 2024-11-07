@@ -1032,7 +1032,29 @@ class Twitter extends Adapter {
     }
   };
 
+  clickLatest = async currentPage => {
+    const latestSelector =
+      'div[role="presentation"] > a[role="tab"][href*="&f=live"]';
 
+    try {
+      await currentPage.waitForSelector(latestSelector, { visible: true });
+
+      const LatestField = await currentPage.$(latestSelector);
+
+      if (LatestField) {
+        const LatestBox = await LatestField.boundingBox();
+        if (LatestBox) {
+          await currentPage.mouse.click(
+            LatestBox.x + LatestBox.width / 2 + this.getRandomOffset(5),
+            LatestBox.y + LatestBox.height / 2 + this.getRandomOffset(5),
+          );
+        }
+        console.log("Clicked on the 'Latest' tab");
+      }
+    } catch (error) {
+      console.error("Could not find or click on the 'Latest' tab:", error);
+    }
+  };
 
   /**
    * parseItem
@@ -1455,27 +1477,7 @@ class Twitter extends Adapter {
 
       await this.page.waitForTimeout(await this.randomDelay(2000));
 
-      const latestSelector =
-        'div[role="presentation"] > a[role="tab"][href*="&f=live"]';
-
-      try {
-        await this.page.waitForSelector(latestSelector, { visible: true });
-
-        const LatestField = await this.page.$(latestSelector);
-
-        if (LatestField) {
-          const LatestBox = await LatestField.boundingBox();
-          if (LatestBox) {
-            await this.page.mouse.click(
-              LatestBox.x + LatestBox.width / 2 + this.getRandomOffset(5),
-              LatestBox.y + LatestBox.height / 2 + this.getRandomOffset(5),
-            );
-          }
-          console.log("Clicked on the 'Latest' tab");
-        }
-      } catch (error) {
-        console.error("Could not find or click on the 'Latest' tab:", error);
-      }
+      await this.clickLatest(this.page);
 
       await this.page.waitForTimeout(await this.randomDelay(2000));
 
