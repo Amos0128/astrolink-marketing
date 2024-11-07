@@ -10,7 +10,7 @@ async function getEndpoints(){
     if (process.env.DEV_MODE === "true"){
         return ["http://localhost:4628"];
     }
-    const endpoints = await fetch("https://vps-tasknet.koii.network/nodes/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM")
+    const endpoints = await fetch("https://vps-tasknet.koii.network/nodes/AN1kMUFoE4KrFPeJb9T4bscnaSvsee66swu8YpsKgGe9")
     const endpointsList = (await endpoints.json()).map(node => node.data.url);
     console.log(endpointsList);
     for (let i = 0; i < endpointsList.length; i++){
@@ -29,7 +29,7 @@ async function askllama(messages, options) {
     const shuffledEndpoints = endpoints.sort(() => Math.random() - 0.5);
     for (let i = 0; i < shuffledEndpoints.length; i++) {
         const randomEndpoint = shuffledEndpoints[i];
-        const accessLink = randomEndpoint + "/task/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM";
+        const accessLink = randomEndpoint + "/task/AN1kMUFoE4KrFPeJb9T4bscnaSvsee66swu8YpsKgGe9";
         try{
             const response = await fetch(`${accessLink}/ask-query`, {
                 method: 'POST',
@@ -48,7 +48,7 @@ async function askllama(messages, options) {
         }
     }
     //if no reply from any endpoint, try the default one
-    const accessLink = "https://vps-tasknet.koii.network/task/73DREuENc1NawrvdsZbvUfhUVYF6voujiEVBaAxmnBwM";
+    const accessLink = "https://vps-tasknet.koii.network/task/AN1kMUFoE4KrFPeJb9T4bscnaSvsee66swu8YpsKgGe9";
     const response = await fetch(`${accessLink}/ask-query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }, 
@@ -70,7 +70,8 @@ async function askGeneralQuestion(generaalQuestion){
         {role: "user", content: generaalQuestion}
     ]; 
     const response = await askllama(messages, {temperature: 1});
-    return response;
+    const reply = await filterResponse(response.reply);
+    return reply
 }
 async function askForComment(tweetText, character, tweetsInfo){
     
