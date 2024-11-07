@@ -70,7 +70,8 @@ async function askGeneralQuestion(generaalQuestion){
         {role: "user", content: generaalQuestion}
     ]; 
     const response = await askllama(messages, {temperature: 1});
-    return response;
+    const reply = await filterResponse(response.reply);
+    return reply
 }
 async function askForComment(tweetText, character, tweetsInfo){
     

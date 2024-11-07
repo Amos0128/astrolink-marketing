@@ -47,8 +47,7 @@ class Context {
         }
         const todayGenTextStr = todayGenText.map(item => item.info).join('\n');
         const updatePrompt = CONSTANT.USER_CHARACTER_UPDATE_PROMPT + currentCharInfo + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_2 + todayGenTextStr + CONSTANT.USER_CHARACTER_UPDATE_PROMPT_3;
-        const response = await askGeneralQuestion(updatePrompt);
-        const updatedCharInfo = response.reply;
+        const updatedCharInfo = await askGeneralQuestion(updatePrompt);
         console.log("updatedCharInfo");
         console.log(updatedCharInfo);
         await this.updateToDB('Char-Info', updatedCharInfo);
@@ -67,8 +66,7 @@ class Context {
             updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_2 + todayTweetsInfoStr;
         }
         updatePrompt += CONSTANT.USER_TWEETS_INFO_UPDATE_PROMPT_3;
-        const response = await askGeneralQuestion(updatePrompt);
-        const updatedTweetsInfo = response.reply;
+        const updatedTweetsInfo = await askGeneralQuestion(updatePrompt);
         console.log("updatedTweetsInfo");
         console.log(updatedTweetsInfo);
         await this.updateToDB('Char-TweetsInfo', updatedTweetsInfo);
