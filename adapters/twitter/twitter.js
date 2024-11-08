@@ -97,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -541,6 +541,28 @@ class Twitter extends Adapter {
     }
   };
 
+  getArticleContainer = async (currentPage, tweetId, tweets_content) => {
+    // Fetch all article containers
+    const articles = await currentPage.$$('article[data-testid="tweet"]');
+
+    for (const article of articles) {
+      // Check if this article matches the tweetId or tweet content
+      const tweetUrl = await article.$eval(
+        'a[href*="/status/"]',
+        el => el.href,
+      );
+      const extractedTweetId = tweetUrl.split('/').pop();
+
+      // console.log(extractedTweetId, tweetId);
+
+      if (extractedTweetId === tweetId) {
+        return article; // Return the article container that matches the tweetId or content
+      }
+    }
+
+    return null; // Return null if no matching article is found
+  };
+
   clickArticle = async (currentPage, tweets_content, tweetId) => {
     console.log('Target article: ' + tweets_content + ' ' + tweetId);
     await currentPage.waitForTimeout(await this.randomDelay(2000));
@@ -705,6 +727,28 @@ class Twitter extends Adapter {
     }
   };
 
+  // Helper function to get the comment container
+  getCommentContainer = async (currentPage, commentText) => {
+    const containers = await currentPage.$$('article[aria-labelledby]');
+
+    try {
+      for (const container of containers) {
+        const textContent = await container.$eval(
+          'div[data-testid="tweetText"]',
+          el => el.innerText,
+        );
+        if (textContent.toLowerCase().includes(commentText.toLowerCase())) {
+          return container; // Return the correct comment container
+        }
+      }
+
+      return null; // No matching comment container found
+    } catch (e) {
+      console.log('Error getting comment container:', e);
+      return null;
+    }
+  };
+
   clickCommentButton = async (currentPage, tweets_content) => {
     // write a comment and post
     console.log('Start genText *******************');
@@ -723,22 +767,25 @@ class Twitter extends Adapter {
     // Wait for the reply button selector to appear on the page
     await currentPage.waitForSelector(replybuttonSelector, { timeout: 10000 });
     await currentPage.waitForTimeout(await this.randomDelay(2000));
-    
+
     // Find all instances of the reply button
     const replyButtons = await currentPage.$$(replybuttonSelector);
-    
+
     // Select the second reply button if there are at least two
-    const replyButton = replyButtons.length >= 1 ? replyButtons[1] : replyButtons[0];
-    
+    const replyButton =
+      replyButtons.length >= 1 ? replyButtons[1] : replyButtons[0];
+
     if (replyButton) {
       const replybuttonBox = await replyButton.boundingBox();
-    
+
       if (replybuttonBox) {
         // Click on the button with random offsets
-        console.log("Clicking on reply button");
+        console.log('Clicking on reply button');
         await currentPage.mouse.click(
           replybuttonBox.x + replybuttonBox.width / 2 + this.getRandomOffset(5),
-          replybuttonBox.y + replybuttonBox.height / 2 + this.getRandomOffset(5)
+          replybuttonBox.y +
+            replybuttonBox.height / 2 +
+            this.getRandomOffset(5),
         );
       } else {
         console.log('Button is not visible.');
@@ -831,50 +878,6 @@ class Twitter extends Adapter {
     }
   };
 
-  // Helper function to get the comment container
-  getCommentContainer = async (currentPage, commentText) => {
-    const containers = await currentPage.$$('article[aria-labelledby]');
-
-    try {
-      for (const container of containers) {
-        const textContent = await container.$eval(
-          'div[data-testid="tweetText"]',
-          el => el.innerText,
-        );
-        if (textContent.toLowerCase().includes(commentText.toLowerCase())) {
-          return container; // Return the correct comment container
-        }
-      }
-
-      return null; // No matching comment container found
-    } catch (e) {
-      console.log('Error getting comment container:', e);
-      return null;
-    }
-  };
-
-  getArticleContainer = async (currentPage, tweetId, tweets_content) => {
-    // Fetch all article containers
-    const articles = await currentPage.$$('article[data-testid="tweet"]');
-
-    for (const article of articles) {
-      // Check if this article matches the tweetId or tweet content
-      const tweetUrl = await article.$eval(
-        'a[href*="/status/"]',
-        el => el.href,
-      );
-      const extractedTweetId = tweetUrl.split('/').pop();
-
-      // console.log(extractedTweetId, tweetId);
-
-      if (extractedTweetId === tweetId) {
-        return article; // Return the article container that matches the tweetId or content
-      }
-    }
-
-    return null; // Return null if no matching article is found
-  };
-
   clickBackButton = async currentPage => {
     await this.slowFingerSlide(this.page, 120, 200, 200, 400, 1, 25); // Slide up to make sure back button is visible
     await currentPage.waitForTimeout(await this.randomDelay(2000));
@@ -907,6 +910,149 @@ class Twitter extends Adapter {
       }
     } else {
       console.log('Back button not found.');
+    }
+  };
+
+  clickFollowButton = async currentPage => {
+    // Define the selector for the follow button based on the given data-testid
+    const followButtonSelector = 'button[data-testid*="-follow"]';
+
+    // Wait for the follow button to be visible
+    await currentPage.waitForSelector(followButtonSelector, { visible: true });
+
+    // Locate the follow button within the page
+    let followButton = await currentPage.$(followButtonSelector);
+
+    if (followButton) {
+      let buttonBox = await followButton.boundingBox();
+
+      // Function to check if the button is in the viewport
+      const isButtonVisible = async box => {
+        const viewport = await currentPage.viewport();
+        console.log(box);
+        return box && box.y >= 0 && box.y + box.height <= viewport.height - 300;
+      };
+
+      // Scroll until the button is fully visible
+      while (!(await isButtonVisible(buttonBox))) {
+        const viewport = await currentPage.viewport();
+        const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
+
+        const startY = 500;
+        const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
+
+        if (scrollAmount <= 0) break;
+
+        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
+        await currentPage.waitForTimeout(await this.randomDelay(2000));
+        // Check if the button has become visible
+        buttonBox = await followButton.boundingBox();
+      }
+
+      // Check if bounding box is available and click the center of the button with random offsets
+      if (buttonBox) {
+        await currentPage.mouse.click(
+          buttonBox.x + buttonBox.width / 2 + this.getRandomOffset(5),
+          buttonBox.y + buttonBox.height / 2 + this.getRandomOffset(5),
+        );
+
+        console.log('Follow button clicked successfully.');
+        return;
+      } else {
+        console.log('Follow button bounding box not available.');
+      }
+    } else {
+      console.log('Follow button not found.');
+    }
+  };
+
+  clickExploreButton = async currentPage => {
+    // Wait for the explore link to be available
+    const exploreLinkSelector = 'a[data-testid="AppTabBar_Explore_Link"]';
+    await currentPage.waitForSelector(exploreLinkSelector, { visible: true });
+
+    await currentPage.waitForTimeout(await this.randomDelay(3000));
+    const exploreLink = await currentPage.$(exploreLinkSelector);
+
+    if (exploreLink) {
+      const linkBox = await exploreLink.boundingBox();
+
+      if (linkBox) {
+        // Simulate a click on the link using mouse.click with random offsets
+        await currentPage.mouse.click(
+          linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
+          linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
+        );
+        await currentPage.waitForTimeout(await this.randomDelay(3000));
+        if (currentPage.url().includes('explore')) {
+          console.log('Explore link clicked successfully!');
+        } else {
+          // retry click
+          await currentPage.mouse.click(
+            linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
+            linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
+          );
+          await currentPage.waitForTimeout(await this.randomDelay(3000));
+          if (currentPage.url().includes('explore')) {
+            console.log('Explore link clicked successfully!');
+          }
+        }
+      } else {
+        console.log('Link bounding box not available.');
+      }
+    } else {
+      console.log('Explore link not found.');
+    }
+  };
+
+  clickInputBox = async (currentpage, inputSelector) => {
+    // Wait for the input element to be visible
+    await currentpage.waitForSelector(inputSelector, { visible: true });
+
+    let searchInputField = await currentpage.$(inputSelector);
+
+    if (searchInputField) {
+      const inputBox = await searchInputField.boundingBox();
+
+      if (inputBox) {
+        // Simulate a click on the input field with random offsets
+        await currentpage.mouse.click(
+          inputBox.x + inputBox.width / 2 + this.getRandomOffset(5),
+          inputBox.y + inputBox.height / 2 + this.getRandomOffset(5),
+        );
+
+        console.log(
+          'Search input field clicked successfully, ready for typing.',
+        );
+      } else {
+        console.log('Search input field bounding box not available.');
+      }
+    } else {
+      console.log('Search input field not found.');
+    }
+  };
+
+  clickLatest = async currentPage => {
+    const latestSelector =
+      'div[role="presentation"] > a[role="tab"][href*="&f=live"]';
+
+    try {
+      await currentPage.waitForSelector(latestSelector, { visible: true });
+
+      const LatestField = await currentPage.$(latestSelector);
+
+      if (LatestField) {
+        const LatestBox = await LatestField.boundingBox();
+        if (LatestBox) {
+          await currentPage.mouse.click(
+            LatestBox.x + LatestBox.width / 2 + this.getRandomOffset(5),
+            LatestBox.y + LatestBox.height / 2 + this.getRandomOffset(5),
+          );
+        }
+        console.log("Clicked on the 'Latest' tab");
+      }
+    } catch (error) {
+      console.error("Could not find or click on the 'Latest' tab:", error);
     }
   };
 
@@ -1315,101 +1461,23 @@ class Twitter extends Adapter {
       }
 
       console.log('Go to search page');
-      // Wait for the explore link to be available
-      const exploreLinkSelector = 'a[data-testid="AppTabBar_Explore_Link"]';
-      await this.page.waitForSelector(exploreLinkSelector, { visible: true });
 
-      await this.page.waitForTimeout(await this.randomDelay(3000));
-      const exploreLink = await this.page.$(exploreLinkSelector);
-
-      if (exploreLink) {
-        const linkBox = await exploreLink.boundingBox();
-
-        if (linkBox) {
-          // Simulate a click on the link using mouse.click with random offsets
-          await this.page.mouse.click(
-            linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
-            linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
-          );
-          await this.page.waitForTimeout(await this.randomDelay(3000));
-          if (this.page.url().includes('explore')) {
-            console.log('Explore link clicked successfully!');
-          } else {
-            // retry click
-            await this.page.mouse.click(
-              linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
-              linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
-            );
-            await this.page.waitForTimeout(await this.randomDelay(3000));
-            if (this.page.url().includes('explore')) {
-              console.log('Explore link clicked successfully!');
-            }
-          }
-        } else {
-          console.log('Link bounding box not available.');
-        }
-      } else {
-        console.log('Explore link not found.');
-      }
-
-      // Define the selector for the search input field
-      const searchInputSelector = 'input[data-testid="SearchBox_Search_Input"]';
-
-      // Wait for the input element to be visible
-      await this.page.waitForSelector(searchInputSelector, { visible: true });
-
-      let searchInputField = await this.page.$(searchInputSelector);
-
-      if (searchInputField) {
-        const inputBox = await searchInputField.boundingBox();
-
-        if (inputBox) {
-          // Simulate a click on the input field with random offsets
-          await this.page.mouse.click(
-            inputBox.x + inputBox.width / 2 + this.getRandomOffset(5),
-            inputBox.y + inputBox.height / 2 + this.getRandomOffset(5),
-          );
-
-          console.log(
-            'Search input field clicked successfully, ready for typing.',
-          );
-        } else {
-          console.log('Search input field bounding box not available.');
-        }
-      } else {
-        console.log('Search input field not found.');
-      }
-
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+      await this.clickExploreButton(this.page);
 
       // Type the search term into the input field
+      const searchInputSelector = 'input[data-testid="SearchBox_Search_Input"]';
+      await this.clickInputBox(this.page, searchInputSelector);
+
+      await this.page.waitForTimeout(await this.randomDelay(3000));
+
       await this.humanType(this.page, searchInputSelector, searchTerm);
+
       // hit enter
       await this.page.keyboard.press('Enter');
 
       await this.page.waitForTimeout(await this.randomDelay(2000));
 
-      const latestSelector =
-        'div[role="presentation"] > a[role="tab"][href*="&f=live"]';
-
-      try {
-        await this.page.waitForSelector(latestSelector, { visible: true });
-
-        const LatestField = await this.page.$(latestSelector);
-
-        if (LatestField) {
-          const LatestBox = await LatestField.boundingBox();
-          if (LatestBox) {
-            await this.page.mouse.click(
-              LatestBox.x + LatestBox.width / 2 + this.getRandomOffset(5),
-              LatestBox.y + LatestBox.height / 2 + this.getRandomOffset(5),
-            );
-          }
-          console.log("Clicked on the 'Latest' tab");
-        }
-      } catch (error) {
-        console.error("Could not find or click on the 'Latest' tab:", error);
-      }
+      await this.clickLatest(this.page);
 
       await this.page.waitForTimeout(await this.randomDelay(2000));
 
@@ -1419,13 +1487,18 @@ class Twitter extends Adapter {
       const errorMessage = await this.page.evaluate(() => {
         const elements = document.querySelectorAll('div[dir="ltr"]');
         for (let element of elements) {
-          console.log(element.textContent);
+          // console.log(element.textContent);
           if (element.textContent === 'Something went wrong. Try reloading.') {
             return true;
           }
         }
         return false;
       });
+
+      if (errorMessage) {
+        console.log('Something went wrong, please check your account');
+        this.browser.close();
+      }
 
       console.log('Waiting for tweets loaded');
       await this.page.waitForTimeout(await this.randomDelay(4500));
@@ -1479,35 +1552,7 @@ class Twitter extends Adapter {
         }
       }
 
-      if (exploreLink) {
-        const linkBox = await exploreLink.boundingBox();
-
-        if (linkBox) {
-          // Simulate a click on the link using mouse.click with random offsets
-          await this.page.mouse.click(
-            linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
-            linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
-          );
-          await this.page.waitForTimeout(await this.randomDelay(3000));
-          if (this.page.url().includes('explore')) {
-            console.log('Explore link clicked successfully!');
-          } else {
-            // retry click
-            await this.page.mouse.click(
-              linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
-              linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
-            );
-            await this.page.waitForTimeout(await this.randomDelay(3000));
-            if (this.page.url().includes('explore')) {
-              console.log('Explore link clicked successfully!');
-            }
-          }
-        } else {
-          console.log('Link bounding box not available.');
-        }
-      } else {
-        console.log('Explore link not found.');
-      }
+      await this.clickExploreButton(this.page);
 
       await this.page.waitForTimeout(await this.randomDelay(3000));
 
@@ -1517,57 +1562,7 @@ class Twitter extends Adapter {
       // Follow user
       await this.page.waitForTimeout(await this.randomDelay(3000));
 
-      // Define the selector for the follow button based on the given data-testid
-      const followButtonSelector = 'button[data-testid*="-follow"]';
-
-      // Wait for the follow button to be visible
-      await this.page.waitForSelector(followButtonSelector, { visible: true });
-
-      // Locate the follow button within the page
-      let followButton = await this.page.$(followButtonSelector);
-
-      if (followButton) {
-        let buttonBox = await followButton.boundingBox();
-
-        // Function to check if the button is in the viewport
-        const isButtonVisible = async box => {
-          const viewport = await this.page.viewport();
-          console.log(box);
-          return (
-            box && box.y >= 0 && box.y + box.height <= viewport.height - 300
-          );
-        };
-
-        // Scroll until the button is fully visible
-        while (!(await isButtonVisible(buttonBox))) {
-          const viewport = await this.page.viewport();
-          const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
-
-          const startY = 500;
-          const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
-
-          if (scrollAmount <= 0) break;
-
-          await this.slowFingerSlide(this.page, 150, startY, 150, endY, 50, 20);
-          await this.page.waitForTimeout(await this.randomDelay(2000));
-          // Check if the button has become visible
-          buttonBox = await followButton.boundingBox();
-        }
-
-        // Check if bounding box is available and click the center of the button with random offsets
-        if (buttonBox) {
-          await this.page.mouse.click(
-            buttonBox.x + buttonBox.width / 2 + this.getRandomOffset(5),
-            buttonBox.y + buttonBox.height / 2 + this.getRandomOffset(5),
-          );
-
-          console.log('Follow button clicked successfully.');
-        } else {
-          console.log('Follow button bounding box not available.');
-        }
-      } else {
-        console.log('Follow button not found.');
-      }
+      await this.clickFollowButton(this.page);
 
       console.log('Time to take a break');
 
