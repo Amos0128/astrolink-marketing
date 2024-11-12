@@ -913,6 +913,59 @@ class Twitter extends Adapter {
     }
   };
 
+  clickVerifiedUser = async currentPage => {
+    // Define the selector for the follow button based on the given data-testid
+    const verifiedIconSelector = 'svg[data-testid="icon-verified"]';
+
+    // Wait for the follow button to be visible
+    await currentPage.waitForSelector(verifiedIconSelector, { visible: true });
+
+    // Locate the follow button within the page
+    let verifiedIcon = await currentPage.$(verifiedIconSelector);
+
+    if (verifiedIcon) {
+      let buttonBox = await verifiedIcon.boundingBox();
+
+      // Function to check if the button is in the viewport
+      const isButtonVisible = async box => {
+        const viewport = await currentPage.viewport();
+        console.log(box);
+        return box && box.y >= 0 && box.y + box.height <= viewport.height - 300;
+      };
+
+      // Scroll until the button is fully visible
+      while (!(await isButtonVisible(buttonBox))) {
+        const viewport = await currentPage.viewport();
+        const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
+
+        const startY = 500;
+        const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
+
+        if (scrollAmount <= 0) break;
+
+        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
+        await currentPage.waitForTimeout(await this.randomDelay(2000));
+        // Check if the button has become visible
+        buttonBox = await verifiedIcon.boundingBox();
+      }
+
+      // Check if bounding box is available and click the center of the button with random offsets
+      if (buttonBox) {
+        await currentPage.mouse.click(
+          buttonBox.x + buttonBox.width / 2 + this.getRandomOffset(5),
+          buttonBox.y + buttonBox.height / 2 + this.getRandomOffset(5),
+        );
+
+        console.log('Verified Icon clicked successfully.');
+        return;
+      } else {
+        console.log('Verified Icon bounding box not available.');
+      }
+    } else {
+      console.log('Verified Icon not found.');
+    }
+  };
+
   clickFollowButton = async currentPage => {
     // Define the selector for the follow button based on the given data-testid
     const followButtonSelector = 'button[data-testid*="-follow"]';
@@ -1510,6 +1563,7 @@ class Twitter extends Adapter {
       });
       console.log('Found items: ', items.length);
       await this.page.waitForTimeout(await this.randomDelay(3000));
+
       // loop the articles
       for (const item of items) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // @soma Nice delay timer, never thought of doing it this way
@@ -1557,17 +1611,25 @@ class Twitter extends Adapter {
       await this.page.waitForTimeout(await this.randomDelay(3000));
 
       // Call the function to perform the slow slide
-      await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 5);
+      await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
 
       // Follow user
       await this.page.waitForTimeout(await this.randomDelay(3000));
 
+      await this.clickVerifiedUser(this.page)
+
+      await this.page.waitForTimeout(await this.randomDelay(4000))
+
       await this.clickFollowButton(this.page);
+
+      await this.page.waitForTimeout(await this.randomDelay(2000))
+
+      await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
 
       console.log('Time to take a break');
 
       // Optional: wait for a moment to allow new elements to load
-      await this.page.waitForTimeout(await this.randomDelay(20000000));
+      await this.page.waitForTimeout(await this.randomDelay(2000));
       this.browser.close();
       return;
     } catch (e) {
