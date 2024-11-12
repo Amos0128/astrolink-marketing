@@ -1,16 +1,16 @@
 # Name and metadata of your task
-task_name: 'Sofies Spark & Spread'
+task_name: 'AstroLink Marketing'
 author: 'Amos'
-markdownDescriptionPath: "./markdown.md"
-description: "This task aims to ignite sparks on emerging topics and, through the collaboration of intelligent nodes, spread these ideas to a broader audience. Participating nodes will automatically identify high-traffic content and engage in targeted interactions to enhance message visibility."
+markdownDescriptionPath: ""
+description: "AstroLink Marketing"
 repositoryUrl: 'https://github.com/Amos0128/test-my-code'
-imageUrl: 'https://bafybeidyykvg5yot2irikidnabkyzqjfh235tgpgp3ffe44nitjw6faepu.ipfs.w3s.link/task.png'
-infoUrl: 'https://x.com/James_Har0ld'
+imageUrl: 'https://bafybeid4mlepkytklysae2mkyfj2js4k4sc5j7ctfb4xmhrabyjrwl7u6q.ipfs.w3s.link/Astro.png'
+infoUrl: 'https://astrolink.market/'
 
 # network value can be DEVELOPMENT , ARWEAVE or IPFS, Recommended IPFS when deploying to testnet as the cli automatically takes care of uploading the executable with the help of web3.js key
 task_executable_network: 'IPFS'
 
-# Path to your executable webpack if the selected network is IPFS and in case of DEVELOPMENT  name it as main
+# Path to your executable webpack if the selected network is IPFS and in  q case of DEVELOPMENT  name it as main
 task_audit_program: 'dist/main.js'
 
 # Total round time of your task : it must be given in slots and each slot is roughly equal to 408ms
@@ -58,13 +58,13 @@ task_type: "KPL"
 
 ## Token Mint Address (ONLY for KPL tasks) ##
 # The Fire Token address is provided as an example.
-token_type: "EErjDSPHmjz9ZipEtVoN54QzCjPvePBADvXcWKT659NW"
+token_type: "6kgpmvSCh6aVNXnCihnrtFYcjLR7pkK6mcLgf3imEC4q"
 
 tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'GZfCXzZ7nfxaA8YvGoyWvSSDEd8b2KgT6TeTEazST2VX'
+task_id: ''
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Fixed Try Catch'
+migrationDescription: ''
