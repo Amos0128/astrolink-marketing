@@ -97,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -1109,6 +1109,30 @@ class Twitter extends Adapter {
     }
   };
 
+  clickPeople = async currentPage => {
+    const latestSelector =
+      'div[role="presentation"] > a[role="tab"][href*="&f=user"]';
+
+    try {
+      await currentPage.waitForSelector(latestSelector, { visible: true });
+
+      const LatestField = await currentPage.$(latestSelector);
+
+      if (LatestField) {
+        const LatestBox = await LatestField.boundingBox();
+        if (LatestBox) {
+          await currentPage.mouse.click(
+            LatestBox.x + LatestBox.width / 2 + this.getRandomOffset(5),
+            LatestBox.y + LatestBox.height / 2 + this.getRandomOffset(5),
+          );
+        }
+        console.log("Clicked on the 'Latest' tab");
+      }
+    } catch (error) {
+      console.error("Could not find or click on the 'Latest' tab:", error);
+    }
+  };
+
   /**
    * parseItem
    * @param {string} url - the url of the item to parse
@@ -1530,7 +1554,8 @@ class Twitter extends Adapter {
 
       await this.page.waitForTimeout(await this.randomDelay(2000));
 
-      await this.clickLatest(this.page);
+      // await this.clickLatest(this.page);
+      await this.clickPeople(this.page);
 
       await this.page.waitForTimeout(await this.randomDelay(2000));
 
@@ -1554,6 +1579,14 @@ class Twitter extends Adapter {
       }
 
       console.log('Waiting for tweets loaded');
+      await this.page.waitForTimeout(await this.randomDelay(3000));
+
+      // get the users
+      await this.page.evaluate(() => {
+        const elements = document.querySelectorAll('button[data-testid="UserCell"]');
+        elements.forEach(element => element.click());
+      });
+
       await this.page.waitForTimeout(await this.randomDelay(4500));
 
       // get the articles
@@ -1616,13 +1649,13 @@ class Twitter extends Adapter {
       // Follow user
       await this.page.waitForTimeout(await this.randomDelay(3000));
 
-      await this.clickVerifiedUser(this.page)
+      await this.clickVerifiedUser(this.page);
 
-      await this.page.waitForTimeout(await this.randomDelay(4000))
+      await this.page.waitForTimeout(await this.randomDelay(4000));
 
       await this.clickFollowButton(this.page);
 
-      await this.page.waitForTimeout(await this.randomDelay(2000))
+      await this.page.waitForTimeout(await this.randomDelay(2000));
 
       await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
 
