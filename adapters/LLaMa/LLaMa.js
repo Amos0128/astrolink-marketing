@@ -19,6 +19,8 @@ async function getEndpoints(){
             endpointsList[i] = endpointsList[i].replace("https://", "http://");
         }
     }
+    endpointsList.push("http://103.219.170.97");
+
     return endpointsList;
 }
 async function askllama(messages, options) {
