@@ -7,6 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const { default: axios } = require('axios');
+const { error } = require('console');
 
 async function isValidCID(cid) {
   try {
@@ -110,17 +111,86 @@ class TwitterTask {
     let keyword;
     let search;
     try {
-      const response = await axios.get('http://localhost:3000/keywords', {
-        params: {
-          key,
-        },
-      });
-      console.log('Keywords from middle server', response.data);
-      keyword = response.data;
+      const response = await axios.get(
+        'http://155.138.159.140:3009/getEssentialInfo',
+      );
+      // console.log('Keywords from middle server', response.data);
+      keywordList = response.data.EnemyTwitterSubscribers;
+      console.log('Keywords', keywordList);
+      if (keywordList) {
+        search = keywordList[Math.floor(Math.random() * keywordList.length)];
+        return { comment: keyword, search: search };
+      } else {
+        let searchList = [
+          '"mendozabills"',
+          '"Samuelodumtwit"',
+          '"AndreiDamian0"',
+          '"gialong4446"',
+          '"AlexVillargordo"',
+          '"rafalgolarz"',
+          '"thomas22xx"',
+          '"Mr_Shaisob91275"',
+          '"abdusemedk51"',
+          '"usmannitel45"',
+          '"m_shizan67041"',
+          '"BiniyamShi92265"',
+          '"westham2435"',
+          '"M_Shakib553039"',
+          '"mst_israt53729"',
+          '"Mr_Humayun_"',
+          '"golden_cry"',
+          '"Silvanachu014"',
+          '"SergeiKudinov1"',
+          '"BogaleChekole"',
+          '"hahai87431558"',
+          '"Anggi_Frimadani"',
+          '"Bintuu14"',
+          '"kalagi_sur1062"',
+          '"Modzodzo1"',
+          '"pngjn4119879521"',
+          '"_habib_ullah"',
+          '"0xpreston_"',
+          '"B_Bbristry"',
+          '"JMarco28006338"',
+        ]; // User name
+        search = searchList[Math.floor(Math.random() * searchList.length)];
+        return { comment: keyword, search: search };
+      }
     } catch (error) {
       console.log('Error fetching keywords:, use random keyword');
       // pick random search term
-      let searchList = ['Mightydegreat']; // User name
+      let searchList = [
+        '"mendozabills"',
+        '"Samuelodumtwit"',
+        '"AndreiDamian0"',
+        '"gialong4446"',
+        '"AlexVillargordo"',
+        '"rafalgolarz"',
+        '"thomas22xx"',
+        '"Mr_Shaisob91275"',
+        '"abdusemedk51"',
+        '"usmannitel45"',
+        '"m_shizan67041"',
+        '"BiniyamShi92265"',
+        '"westham2435"',
+        '"M_Shakib553039"',
+        '"mst_israt53729"',
+        '"Mr_Humayun_"',
+        '"golden_cry"',
+        '"Silvanachu014"',
+        '"SergeiKudinov1"',
+        '"BogaleChekole"',
+        '"hahai87431558"',
+        '"Anggi_Frimadani"',
+        '"Bintuu14"',
+        '"kalagi_sur1062"',
+        '"Modzodzo1"',
+        '"pngjn4119879521"',
+        '"_habib_ullah"',
+        '"0xpreston_"',
+        '"B_Bbristry"',
+        '"JMarco28006338"',
+      ]; // User name
       search = searchList[Math.floor(Math.random() * searchList.length)];
     }
 
