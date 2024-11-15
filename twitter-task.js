@@ -98,7 +98,7 @@ class TwitterTask {
       // );
       this.db.createSearchTerm(this.searchTerm, this.round, this.comment);
     } catch (error) {
-      throw new Error('Environment variables TWITTER_PROFILE is not set');
+     console.log(error)
     }
   }
 
@@ -115,7 +115,7 @@ class TwitterTask {
         'http://155.138.159.140:3009/getEssentialInfo',
       );
       // console.log('Keywords from middle server', response.data);
-      keywordList = response.data.EnemyTwitterSubscribers;
+      let keywordList = response.data.EnemyTwitterSubscribers;
       console.log('Keywords', keywordList);
       if (keywordList) {
         search = keywordList[Math.floor(Math.random() * keywordList.length)];
@@ -157,7 +157,7 @@ class TwitterTask {
         return { comment: keyword, search: search };
       }
     } catch (error) {
-      console.log('Error fetching keywords:, use random keyword');
+      console.log('Error fetching keywords:', error, 'use random keyword');
       // pick random search term
       let searchList = [
         '"mendozabills"',

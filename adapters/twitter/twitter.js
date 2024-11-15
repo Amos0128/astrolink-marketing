@@ -754,6 +754,7 @@ class Twitter extends Adapter {
     console.log('Start genText *******************');
     let commentResponse = await this.genText(tweets_content);
     let genText = commentResponse.reply;
+    // let genText = 'Hi there!';
     if (!genText) {
       return;
     }
@@ -761,7 +762,6 @@ class Twitter extends Adapter {
     console.log('End genText *******************');
     await this.context.addToDB('Daily-GenText', genText);
 
-    await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2); // Avoid button overlay
     const replybuttonSelector = 'button[data-testid="reply"]'; // Selector for the reply button
 
     // Wait for the reply button selector to appear on the page
@@ -772,20 +772,48 @@ class Twitter extends Adapter {
     const replyButtons = await currentPage.$$(replybuttonSelector);
 
     // Select the second reply button if there are at least two
-    const replyButton =
-      replyButtons.length >= 1 ? replyButtons[1] : replyButtons[0];
+    // const replyButton =
+    //   replyButtons.length >= 1 ? replyButtons[1] : replyButtons[0];
+
+    const replyButton = replyButtons[0];
 
     if (replyButton) {
-      const replybuttonBox = await replyButton.boundingBox();
+      let replybuttonBox = await replyButton.boundingBox();
 
-      if (replybuttonBox) {
+      const isButtonVisible = async box => {
+        const viewport = await currentPage.viewport();
+        return box && box.y >= 0 && box.y + box.height <= viewport.height - 100;
+      };
+
+      // Scroll until the like button is within the viewport
+      while (!(await isButtonVisible(replybuttonBox))) {
+        const viewport = await currentPage.viewport();
+
+        const scrollAmount = Math.max(
+          0,
+          replybuttonBox.y - viewport.height / 2,
+        );
+
+        const startY = 650;
+        const endY = startY - scrollAmount;
+
+        if (scrollAmount <= 0) break;
+
+        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 70, 10);
+        await currentPage.waitForTimeout(await this.randomDelay(2000));
+
+        replybuttonBox = await replyButton.boundingBox();
+      }
+
+      const isReplyButtonVisible =
+        replybuttonBox && (await isButtonVisible(replybuttonBox));
+
+      if (isReplyButtonVisible) {
         // Click on the button with random offsets
         console.log('Clicking on reply button');
         await currentPage.mouse.click(
-          replybuttonBox.x + replybuttonBox.width / 2 + this.getRandomOffset(5),
-          replybuttonBox.y +
-            replybuttonBox.height / 2 +
-            this.getRandomOffset(5),
+          replybuttonBox.x + replybuttonBox.width / 2,
+          replybuttonBox.y + replybuttonBox.height / 2,
         );
       } else {
         console.log('Button is not visible.');
@@ -839,6 +867,7 @@ class Twitter extends Adapter {
           const $ = cheerio.load(comment);
 
           const tweetUrl = $('a[href*="/status/"]').attr('href');
+          console.log(tweetUrl)
           const tweetId = tweetUrl.split('/').pop();
           // Find the href for the username inside each individual comment
           const linkElement = $('a[tabindex="-1"]');
@@ -1583,7 +1612,9 @@ class Twitter extends Adapter {
 
       // get the users
       await this.page.evaluate(() => {
-        const elements = document.querySelectorAll('button[data-testid="UserCell"]');
+        const elements = document.querySelectorAll(
+          'button[data-testid="UserCell"]',
+        );
         elements.forEach(element => element.click());
       });
 
