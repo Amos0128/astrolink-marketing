@@ -11,10 +11,10 @@ const bcrypt = require('bcryptjs');
 const nlp = require('compromise');
 const { Context } = require('../context/context');
 const {
-  askGeneralQuestion,
+  // askGeneralQuestion,
   askForComment,
-  askForKeywords,
-  generateCharacter,
+  // askForKeywords,
+  // generateCharacter,
 } = require('../LLaMa/LLaMa');
 /**
  * Twitter
@@ -79,7 +79,7 @@ class Twitter extends Adapter {
    * 5. Queue twitterLogin()
    */
   negotiateSession = async () => {
-    await this.context.initializeContext();
+    await this.context.initialized();
     try {
       if (this.browser) {
         await this.browser.close();
@@ -1394,13 +1394,14 @@ class Twitter extends Adapter {
 
   async genText(textToRead) {
     await this.context.initializeContext();
-    await this.context.checkUpdates();
+    // await this.context.checkUpdates();
     const character = await this.context.getOrCreateCharacter();
-    const tweetsInfo = await this.context.getOrCreateTweetsInfo();
+    // const tweetsInfo = await this.context.getOrCreateTweetsInfo();
+    const marketingBrief = await this.context.getMarketingBrief();
     const commentResponse = await askForComment(
-      textToRead,
+      textToRead, 
       character,
-      tweetsInfo,
+      marketingBrief
     );
     return commentResponse;
   }

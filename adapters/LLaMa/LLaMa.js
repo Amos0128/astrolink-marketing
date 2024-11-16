@@ -26,19 +26,21 @@ async function getEndpoints(){
 async function askllama(messages, options) {
     console.log("messages", messages);
     const endpoints = await getEndpoints();
-    console.log(endpoints);
+    // console.log(endpoints);
     // shuffle the endpoints
     const shuffledEndpoints = endpoints.sort(() => Math.random() - 0.5);
     for (let i = 0; i < shuffledEndpoints.length; i++) {
         const randomEndpoint = shuffledEndpoints[i];
         const accessLink = randomEndpoint + "/task/BozYJz5EpMM8jpHEro4AwkCmp2JtMcMQneHaohJSvLmf";
         try{
+            // Wait for 15 seconds before making the request
+            await new Promise(resolve => setTimeout(resolve, 15000));
+            
             const response = await fetch(`${accessLink}/ask-query`, {
                 method: 'POST',
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ model: "koiiLlama", messages: messages, options: options }) 
-          });
-       
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ model: "koiiLlama", messages: messages, options: options }) 
+            });
             const data = await response.json();
             const reply = data.reply;  
             console.log("REPLY HERE"); 
@@ -67,20 +69,35 @@ async function askllama(messages, options) {
         return "";
     }
 }
-async function askGeneralQuestion(generaalQuestion){
-    const messages = [
-        {role: "user", content: generaalQuestion}
-    ]; 
-    const response = await askllama(messages, {temperature: 1});
-    const reply = await filterResponse(response.reply);
-    return reply
-}
-async function askForComment(tweetText, character, tweetsInfo){
+// async function askGeneralQuestion(generaalQuestion){
+//     const messages = [
+//         {role: "user", content: generaalQuestion}
+//     ]; 
+//     const response = await askllama(messages, {temperature: 1});
+//     const reply = await filterResponse(response.reply);
+//     return reply
+// }
+// async function askForComment(tweetText, character, tweetsInfo){
+    
+//     const messages = [
+//         {role:"system", content: CONSTANT.COMMENT_SYSTEM_PROMPT},
+//         {role:"user", content: `Your character is ${character}`},
+//         {role:"user", content: `Your knowledge is ${tweetsInfo}`},
+//         {role: "user", content: `You have read the following tweet: ${tweetText}`},
+//         {role:"user", content: `Imagine you are the character, please reply a comment in response to the tweet.`}
+//     ];
+//     const response = await askllama(messages, {temperature: 1, num_predict: 45});
+//     const reply = await filterResponse(response.reply);
+//     return {reply: reply, endpoint: response.endpoint};
+// }
+
+async function askForComment(tweetText, character,marketingBrief){
     
     const messages = [
         {role:"system", content: CONSTANT.COMMENT_SYSTEM_PROMPT},
         {role:"user", content: `Your character is ${character}`},
-        {role:"user", content: `Your knowledge is ${tweetsInfo}`},
+        // {role:"user", content: `Your knowledge is ${tweetsInfo}`},
+        {role:"user", content: `Your marketing brief is ${marketingBrief}`},
         {role: "user", content: `You have read the following tweet: ${tweetText}`},
         {role:"user", content: `Imagine you are the character, please reply a comment in response to the tweet.`}
     ];
@@ -101,15 +118,15 @@ async function generateCharacter(){
     return {reply: reply, endpoint: response.endpoint};
 }
 
-async function askForKeywords(){
-    const messages = [
-        {role:"system", content: CONSTANT.KEYWORD_SYSTEM_PROMPT},
-        {role: "user", content: CONSTANT.BREIF_BG_INFO},
-        {role: "user", content: CONSTANT.USER_KEYWORD_PROMPT}
-    ];
-    const response = await askllama(messages, {temperature: 1, num_predict: 10});
-    const reply = await filterResponse(response.reply);
-    return {reply: reply, endpoint: response.endpoint};
-}
+// async function askForKeywords(){
+//     const messages = [
+//         {role:"system", content: CONSTANT.KEYWORD_SYSTEM_PROMPT},
+//         {role: "user", content: CONSTANT.BREIF_BG_INFO},
+//         {role: "user", content: CONSTANT.USER_KEYWORD_PROMPT}
+//     ];
+//     const response = await askllama(messages, {temperature: 1, num_predict: 10});
+//     const reply = await filterResponse(response.reply);
+//     return {reply: reply, endpoint: response.endpoint};
+// }
 
-module.exports = { askllama, askGeneralQuestion, askForComment, askForKeywords, generateCharacter };
+module.exports = { askllama, generateCharacter, askForComment }; //askGeneralQuestion,  askForKeywords, 
