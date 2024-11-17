@@ -97,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        headless: false,
+        // headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -406,8 +406,8 @@ class Twitter extends Adapter {
     if (this.proofs) {
       // we need to upload proofs for that round and then store the cid
       const data = await this.cids.getList({ round: round });
-      console.log(`got cids list for round ${round}`);
-
+      console.log(`got data for round ${round}`);
+      console.log(data)
       if (data && data.length === 0) {
         console.log('No cids found for round ' + round);
         return null;
@@ -867,7 +867,7 @@ class Twitter extends Adapter {
           const $ = cheerio.load(comment);
 
           const tweetUrl = $('a[href*="/status/"]').attr('href');
-          console.log(tweetUrl)
+          console.log(tweetUrl);
           const tweetId = tweetUrl.split('/').pop();
           // Find the href for the username inside each individual comment
           const linkElement = $('a[tabindex="-1"]');
@@ -1288,69 +1288,73 @@ class Twitter extends Adapter {
         console.log('No comment action was taken due to recent activity.');
       }
 
-      let processedComments = new Set(); // Track processed comments
+      try {
+        let processedComments = new Set(); // Track processed comments
 
-      for (let i = 0; i < 5; i++) {
-        await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 10);
-        await currentPage.waitForTimeout(await this.randomDelay(2000));
+        for (let i = 0; i < 5; i++) {
+          await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 10);
+          await currentPage.waitForTimeout(await this.randomDelay(2000));
 
-        // Fetch the current comments
-        const comments = await currentPage.evaluate(() => {
-          const elements = document.querySelectorAll(
-            'article[aria-labelledby]',
-          );
-          return Array.from(elements).map(element => element.outerHTML);
-        });
-
-        // console.log('Found comments: ', comments.length);
-
-        for (const comment of comments) {
-          await currentPage.waitForTimeout(await this.randomDelay(500));
-          const $ = cheerio.load(comment);
-          const commentText = $('div[data-testid="tweetText"]').text().trim(); // Get comment text
-
-          await this.context.addToDB('Tweet-content', commentText);
-          // Check if the comment is already processed
-          if (processedComments.has(commentText)) {
-            // console.log('Skipping duplicate comment.');
-            continue; // Skip if the comment has already been processed
-          }
-
-          // Add this comment to the processed set
-          processedComments.add(commentText);
-
-          let shouldLike = Math.random() < 0.3;
-
-          if (shouldLike) {
-            // Find the correct like button for this comment
-            const commentContainer = await this.getCommentContainer(
-              currentPage,
-              commentText,
+          // Fetch the current comments
+          const comments = await currentPage.evaluate(() => {
+            const elements = document.querySelectorAll(
+              'article[aria-labelledby]',
             );
-            if (commentContainer) {
-              // console.log('Found comment container for the matching comment.');
-              let currentUrl = currentPage.url();
-              await this.clickLikeButton(currentPage, commentContainer); // Pass the comment container to the click function
-              // check if url changed
-              if (currentUrl !== currentPage.url()) {
-                console.log(
-                  'Url changed after like action. Changed to:',
-                  currentPage.url(),
-                );
-                return false;
+            return Array.from(elements).map(element => element.outerHTML);
+          });
+
+          // console.log('Found comments: ', comments.length);
+
+          for (const comment of comments) {
+            await currentPage.waitForTimeout(await this.randomDelay(500));
+            const $ = cheerio.load(comment);
+            const commentText = $('div[data-testid="tweetText"]').text().trim(); // Get comment text
+
+            await this.context.addToDB('Tweet-content', commentText);
+            // Check if the comment is already processed
+            if (processedComments.has(commentText)) {
+              // console.log('Skipping duplicate comment.');
+              continue; // Skip if the comment has already been processed
+            }
+
+            // Add this comment to the processed set
+            processedComments.add(commentText);
+
+            let shouldLike = Math.random() < 0.3;
+
+            if (shouldLike) {
+              // Find the correct like button for this comment
+              const commentContainer = await this.getCommentContainer(
+                currentPage,
+                commentText,
+              );
+              if (commentContainer) {
+                // console.log('Found comment container for the matching comment.');
+                let currentUrl = currentPage.url();
+                await this.clickLikeButton(currentPage, commentContainer); // Pass the comment container to the click function
+                // check if url changed
+                if (currentUrl !== currentPage.url()) {
+                  console.log(
+                    'Url changed after like action. Changed to:',
+                    currentPage.url(),
+                  );
+                  return false;
+                } else {
+                  console.log('Like action performed successfully.');
+                }
               } else {
-                console.log('Like action performed successfully.');
+                console.log(
+                  'Could not find comment container for the matching comment.',
+                );
               }
             } else {
-              console.log(
-                'Could not find comment container for the matching comment.',
-              );
+              // Skipping like for this comment
+              // console.log('Skipping like for this comment.');
             }
-          } else {
-            // Skipping like for this comment
-            // console.log('Skipping like for this comment.');
           }
         }
+      } catch (e) {
+        console.log('Something went wrong when performing Like action', e);
       }
 
       if (screen_name && tweet_text && commentDetails.commentId) {
@@ -1399,9 +1403,9 @@ class Twitter extends Adapter {
     // const tweetsInfo = await this.context.getOrCreateTweetsInfo();
     const marketingBrief = await this.context.getMarketingBrief();
     const commentResponse = await askForComment(
-      textToRead, 
+      textToRead,
       character,
-      marketingBrief
+      marketingBrief,
     );
     return commentResponse;
   }
@@ -1646,22 +1650,18 @@ class Twitter extends Adapter {
           }
 
           // check if comment found or not
-          if (!data.tweets_id) {
-            let checkItem = {
+          if (
+            data.tweets_id !== (undefined || null) &&
+            data.commentDetails.commentId !== (undefined || null)
+          ) {
+            this.cids.create({
               id: data.tweets_id,
-            };
-            const existingItem = await this.db.getItem(checkItem);
-            if (
-              !existingItem &&
-              data.tweets_id !== undefined &&
-              data.commentDetails.commentId !== undefined
-            ) {
-              this.cids.create({
-                id: data.tweets_id,
-                round: round,
-                data: data,
-              });
-            }
+              round: round,
+              data: data,
+            });
+            console.log('Success storing data');
+          } else {
+            console.log('Failed storing data.');
           }
         } catch (e) {
           console.log(

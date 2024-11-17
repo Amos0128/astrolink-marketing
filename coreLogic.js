@@ -99,7 +99,7 @@ class CoreLogic {
         this.twitterTask === undefined ||
         this.twitterTask === ''
       ) {
-        console.log('No submission call made as return cid is null');
+        console.log('No submission call made as twitterTask not started');
       } else {
         const cid = await this.twitterTask.getRoundCID(roundNumber);
         if (cid) {
