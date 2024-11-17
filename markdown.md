@@ -1,1 +1,1 @@
-This task aims to ignite sparks on emerging topics and, through the collaboration of intelligent nodes, spread these ideas to a broader audience. Participating nodes will automatically identify high-traffic content and engage in targeted interactions to enhance message visibility.
+## This task aims to ignite sparks on emerging topics and, through the collaboration of intelligent nodes, spread these ideas to a broader audience. Participating nodes will automatically identify high-traffic content and engage in targeted interactions to enhance message visibility.
