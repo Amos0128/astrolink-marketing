@@ -1291,7 +1291,7 @@ class Twitter extends Adapter {
       try {
         let processedComments = new Set(); // Track processed comments
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
           await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 10);
           await currentPage.waitForTimeout(await this.randomDelay(2000));
 
