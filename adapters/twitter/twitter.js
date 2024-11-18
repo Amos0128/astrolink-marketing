@@ -407,7 +407,7 @@ class Twitter extends Adapter {
       // we need to upload proofs for that round and then store the cid
       const data = await this.cids.getList({ round: round });
       console.log(`got data for round ${round}`);
-      console.log(data)
+      console.log(data);
       if (data && data.length === 0) {
         console.log('No cids found for round ' + round);
         return null;
@@ -1782,6 +1782,13 @@ class Twitter extends Adapter {
         });
       const timeRaw = $(el).find('time').attr('datetime');
       const time = await this.convertToTimestamp(timeRaw);
+
+      // Get views
+      const viewsElement = $(el)
+        .find('span[data-testid="app-text-transition-container"]')
+        .text();
+      const views = viewsElement || '0'; // Default to '0' if views are not found
+      console.log(views);
       // this is for the hash and salt
       const tweets_content = tweet_text.replace(/\n/g, '<br>');
 
@@ -1849,6 +1856,7 @@ class Twitter extends Adapter {
                       getComments,
                       username,
                       postTime,
+                      // views,
                     });
                   } catch (error) {
                     console.error('Error processing comment:', error);
@@ -1894,6 +1902,7 @@ class Twitter extends Adapter {
         tweets_id: tweetId,
         tweets_content: tweets_content,
         time_post: time,
+        views: views,
         commentDetails: foundItem,
       };
 
@@ -1910,18 +1919,13 @@ class Twitter extends Adapter {
     console.log('----Input Item Above -----');
     try {
       const options = {};
-      const userAuditDir = path.join(
-        __dirname,
-        'puppeteer_cache_VIP_twitter_archive_audit',
-      );
       const stats = await PCR(options);
       console.log(
         '*****************************************CALLED Audit VERIFIER*****************************************',
       );
       let auditBrowser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
-        userDataDir: userAuditDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         args: [
