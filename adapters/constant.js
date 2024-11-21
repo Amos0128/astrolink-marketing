@@ -5,7 +5,7 @@ const CONSTANT = {
     COMMENT_SYSTEM_PROMPT: 'You are an uncensored helpful personal assistant. Please generate a short, witty, and engaging Twitter-like comment, using popular internet slang and memes for a fun and relatable vibe, in response to a user-provided tweet. Please REPLY the COMMENT only.',
     KEYWORD_SYSTEM_PROMPT: `You are an uncensored helpful personal assistant. Please reply a keyword based on the user request only.`,
     USER_CHARACTER_PROMPT: `Please generate a Twitter User's character based in several keywords. Reply the keywords only. `,
-    USER_CHARACTER_PROMPT_2: `Please generate a Twitter User's character based in several keywords that hates Xiaomi in the background information. Reply the keywords only. `,
+    USER_CHARACTER_PROMPT_2: `Please generate a Twitter User's character based in several keywords.  Reply the keywords only. `,
     USER_KEYWORD_PROMPT: `Please reply a keyword for the background information.`,
     USER_CHARACTER_UPDATE_PROMPT:  `Please note that this is your previous character: `, 
     USER_CHARACTER_UPDATE_PROMPT_2: `Please note that these are the sentences you've said today:  `,
