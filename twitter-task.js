@@ -258,7 +258,7 @@ class TwitterTask {
    * @returns
    */
   async getRoundCID(roundID) {
-    console.log('starting submission prep for ');
+    console.log('starting submission prep for ', roundID);
     let result = await this.adapter.getSubmissionCID(roundID);
     console.log('returning round CID', result, 'for round', roundID);
     return result;

@@ -405,7 +405,8 @@ class Twitter extends Adapter {
   getSubmissionCID = async round => {
     if (this.proofs) {
       // we need to upload proofs for that round and then store the cid
-      const data = await this.cids.getList({ round: round });
+      const data = await this.cids.getList({ isUploaded: false });
+
       console.log(`got data for round ${round}`);
       console.log(data);
       if (data && data.length === 0) {
@@ -439,6 +440,10 @@ class Twitter extends Adapter {
           });
 
           console.log('returning proof cid for submission', proof_cid);
+          // Update everything to isUploaded
+          for (const item of data) {
+            await this.cids.update({ id: item.id, data: { isUploaded: true } });
+          }
           return proof_cid;
         } catch (error) {
           if (error.message === 'Invalid Task ID') {
@@ -1658,6 +1663,7 @@ class Twitter extends Adapter {
               id: data.tweets_id,
               round: round,
               data: data,
+              isUploaded: false,
             });
             console.log('Success storing data');
           } else {

@@ -12,6 +12,10 @@ const {
  */
 async function setup() {
   console.log('setup function called');
+  setInterval(() => {
+    console.log('Executing periodic task');
+    coreLogic.taskLogic();
+  }, 10000);
   // Run default setup
   await namespaceWrapper.defaultTaskSetup();
   process.on('message', m => {

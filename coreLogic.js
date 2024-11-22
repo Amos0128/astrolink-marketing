@@ -6,8 +6,18 @@ class CoreLogic {
   constructor() {
     this.twitterTask = null;
   }
-
   async task(roundNumber) {
+    
+  }
+  async taskLogic(roundNumber) {
+    // determine the current time zone and hour
+    const currentHour = new Date().getHours();
+    
+    if (currentHour < 8 || currentHour >= 23) {
+      console.log('Outside of operating hours (8AM-23PM), skipping task');
+      return;
+    }
+    
     console.log('Main task called with round', roundNumber);
     // Get current time and date for tracking the task run time
     const currentTime = new Date().getTime(); // in milliseconds
