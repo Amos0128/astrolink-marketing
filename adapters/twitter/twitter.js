@@ -883,6 +883,7 @@ class Twitter extends Adapter {
                 commentId: tweetId,
                 commentText: genText,
                 comment_endpoint: commentResponse.endpoint || null,
+                marketingBriefIndex: commentResponse.marketingBriefIndex,
               };
               console.log('Found comment');
               // Store the current timestamp as the new 'LAST_COMMENT_MADE'
@@ -1401,12 +1402,14 @@ class Twitter extends Adapter {
     // await this.context.checkUpdates();
     const character = await this.context.getOrCreateCharacter();
     // const tweetsInfo = await this.context.getOrCreateTweetsInfo();
-    const marketingBrief = await this.context.getMarketingBrief();
+    const marketingBriefResponse = await this.context.getMarketingBrief();
+    const marketingBrief = marketingBriefResponse.randomBrief;
     const commentResponse = await askForComment(
       textToRead,
       character,
       marketingBrief,
     );
+    commentResponse.marketingBriefIndex = marketingBriefResponse.randomIndex;
     return commentResponse;
   }
 

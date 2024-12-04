@@ -47,9 +47,9 @@ class Context {
     const marketingBriefServer = 'http://155.138.159.140:3009/getEssentialInfo';
     const response = await fetch(marketingBriefServer);
     const data = await response.json();
-    const randomBrief =
-      data.MarketBrief[Math.floor(Math.random() * data.MarketBrief.length)][0];
-    return randomBrief;
+    const randomIndex = Math.floor(Math.random() * data.MarketBrief.length);
+    const randomBrief = data.MarketBrief[randomIndex][0];
+    return { randomIndex, randomBrief };
   }
   // // Get the context
   // async getContext(){
