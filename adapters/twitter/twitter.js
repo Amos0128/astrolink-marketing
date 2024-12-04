@@ -1501,9 +1501,8 @@ class Twitter extends Adapter {
   checkCommentTimestamp = async currentTimeStamp => {
     try {
       // Retrieve the last comment timestamp from the database (in seconds)
-      const lastCommentTimestamp = await this.commentsDB.getTimestamp(
-        'LAST_COMMENT_MADE',
-      );
+      const lastCommentTimestamp =
+        await this.commentsDB.getTimestamp('LAST_COMMENT_MADE');
       if (!lastCommentTimestamp) {
         console.log('No previous comment timestamp found in the database.');
         return true; // No timestamp, allow the new comment

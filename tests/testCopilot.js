@@ -15,7 +15,7 @@
 // }
 
 // let textToRead = `
-//   Everyone WANTS to invest in fundamentals for 🚀, but we are being FORCED to invest in memes for 💰 
+//   Everyone WANTS to invest in fundamentals for 🚀, but we are being FORCED to invest in memes for 💰
 
 // So, how do we turn this degen meme energy into a sustainable flywheel 🛞 for AI 🤖?
 //   `;

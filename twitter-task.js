@@ -98,7 +98,7 @@ class TwitterTask {
       // );
       this.db.createSearchTerm(this.searchTerm, this.round, this.comment);
     } catch (error) {
-     console.log(error)
+      console.log(error);
     }
   }
 

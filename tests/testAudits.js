@@ -10,12 +10,7 @@ const credentials = {
 const db = new Data('db', []);
 const maxRetry = 3;
 
-const twitterInstance = new Twitter(
-  credentials,
-  db,
-  maxRetry,
-  '',
-);
+const twitterInstance = new Twitter(credentials, db, maxRetry, '');
 
 (async () => {
   try {

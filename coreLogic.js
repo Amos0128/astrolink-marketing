@@ -52,7 +52,10 @@ class CoreLogic {
         currentTime > targetStopTime + 6 * 60 * 60 * 1000) // 6 hours after the target stop time
     ) {
       // If the task has not been run before, set the target stop time and run time
-      if (targetStopTime === 0 || currentTime > targetStopTime + 6 * 60 * 60 * 1000) {
+      if (
+        targetStopTime === 0 ||
+        currentTime > targetStopTime + 6 * 60 * 60 * 1000
+      ) {
         let targetStopTime = currentTime + randomRuntime;
         let targetRunTime = 0;
         let runtimeData = {
@@ -144,9 +147,8 @@ class CoreLogic {
       let taskAccountDataJSON = null;
       let taskStakeListJSON = null;
       try {
-        taskAccountDataJSON = await namespaceWrapper.getTaskSubmissionInfo(
-          round,
-        );
+        taskAccountDataJSON =
+          await namespaceWrapper.getTaskSubmissionInfo(round);
       } catch (error) {
         console.error('ERROR IN FETCHING TASK SUBMISSION DATA', error);
         return distributionList;
