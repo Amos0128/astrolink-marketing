@@ -97,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -1219,30 +1219,30 @@ class Twitter extends Adapter {
 
       await currentPage.waitForTimeout(await this.randomDelay(3000));
 
-      // Click like button
-      const commentContainer = await this.getCommentContainer(
-        currentPage,
-        tweet_text,
-      );
-      if (commentContainer) {
-        let currentUrl = currentPage.url();
-        await this.clickLikeButton(currentPage, commentContainer);
+      // // Click like button (now unused)
+      // const commentContainer = await this.getCommentContainer(
+      //   currentPage,
+      //   tweet_text,
+      // );
+      // if (commentContainer) {
+      //   let currentUrl = currentPage.url();
+      //   await this.clickLikeButton(currentPage, commentContainer);
 
-        // check if url changed
-        if (currentUrl !== currentPage.url()) {
-          console.log(
-            'Url changed after like action. Changed to:',
-            currentPage.url(),
-          );
-          return false;
-        } else {
-          console.log('Like action performed successfully.');
-        }
-      } else {
-        console.log('Comment container not found for the tweet.');
-      }
+      //   // check if url changed
+      //   if (currentUrl !== currentPage.url()) {
+      //     console.log(
+      //       'Url changed after like action. Changed to:',
+      //       currentPage.url(),
+      //     );
+      //     return false;
+      //   } else {
+      //     console.log('Like action performed successfully.');
+      //   }
+      // } else {
+      //   console.log('Comment container not found for the tweet.');
+      // }
 
-      await currentPage.waitForTimeout(await this.randomDelay(3000));
+      // await currentPage.waitForTimeout(await this.randomDelay(3000));
 
       // Check if already posted the comment
       let isAlreadComment = false;
@@ -1296,63 +1296,63 @@ class Twitter extends Adapter {
           await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 10);
           await currentPage.waitForTimeout(await this.randomDelay(2000));
 
-          // Fetch the current comments
-          const comments = await currentPage.evaluate(() => {
-            const elements = document.querySelectorAll(
-              'article[aria-labelledby]',
-            );
-            return Array.from(elements).map(element => element.outerHTML);
-          });
+          // // Fetch the current comments
+          // const comments = await currentPage.evaluate(() => {
+          //   const elements = document.querySelectorAll(
+          //     'article[aria-labelledby]',
+          //   );
+          //   return Array.from(elements).map(element => element.outerHTML);
+          // });
 
-          // console.log('Found comments: ', comments.length);
+          // // console.log('Found comments: ', comments.length);
 
-          for (const comment of comments) {
-            await currentPage.waitForTimeout(await this.randomDelay(500));
-            const $ = cheerio.load(comment);
-            const commentText = $('div[data-testid="tweetText"]').text().trim(); // Get comment text
+          // for (const comment of comments) {
+          //   await currentPage.waitForTimeout(await this.randomDelay(500));
+          //   const $ = cheerio.load(comment);
+          //   const commentText = $('div[data-testid="tweetText"]').text().trim(); // Get comment text
 
-            await this.context.addToDB('Tweet-content', commentText);
-            // Check if the comment is already processed
-            if (processedComments.has(commentText)) {
-              // console.log('Skipping duplicate comment.');
-              continue; // Skip if the comment has already been processed
-            }
+          //   await this.context.addToDB('Tweet-content', commentText);
+          //   // Check if the comment is already processed
+          //   if (processedComments.has(commentText)) {
+          //     // console.log('Skipping duplicate comment.');
+          //     continue; // Skip if the comment has already been processed
+          //   }
 
-            // Add this comment to the processed set
-            processedComments.add(commentText);
+          //   // Add this comment to the processed set
+          //   processedComments.add(commentText);
 
-            let shouldLike = Math.random() < 0.3;
+          //   let shouldLike = Math.random() < 0.3;
 
-            if (shouldLike) {
-              // Find the correct like button for this comment
-              const commentContainer = await this.getCommentContainer(
-                currentPage,
-                commentText,
-              );
-              if (commentContainer) {
-                // console.log('Found comment container for the matching comment.');
-                let currentUrl = currentPage.url();
-                await this.clickLikeButton(currentPage, commentContainer); // Pass the comment container to the click function
-                // check if url changed
-                if (currentUrl !== currentPage.url()) {
-                  console.log(
-                    'Url changed after like action. Changed to:',
-                    currentPage.url(),
-                  );
-                  return false;
-                } else {
-                  console.log('Like action performed successfully.');
-                }
-              } else {
-                console.log(
-                  'Could not find comment container for the matching comment.',
-                );
-              }
-            } else {
-              // Skipping like for this comment
-              // console.log('Skipping like for this comment.');
-            }
-          }
+          //   if (shouldLike) {
+          //     // Find the correct like button for this comment
+          //     const commentContainer = await this.getCommentContainer(
+          //       currentPage,
+          //       commentText,
+          //     );
+          //     if (commentContainer) {
+          //       // console.log('Found comment container for the matching comment.');
+          //       let currentUrl = currentPage.url();
+          //       await this.clickLikeButton(currentPage, commentContainer); // Pass the comment container to the click function
+          //       // check if url changed
+          //       if (currentUrl !== currentPage.url()) {
+          //         console.log(
+          //           'Url changed after like action. Changed to:',
+          //           currentPage.url(),
+          //         );
+          //         return false;
+          //       } else {
+          //         console.log('Like action performed successfully.');
+          //       }
+          //     } else {
+          //       console.log(
+          //         'Could not find comment container for the matching comment.',
+          //       );
+          //     }
+          //   } else {
+          //     // Skipping like for this comment
+          //     // console.log('Skipping like for this comment.');
+          //   }
+          // }
         }
       } catch (e) {
         console.log('Something went wrong when performing Like action', e);
@@ -1504,8 +1504,9 @@ class Twitter extends Adapter {
   checkCommentTimestamp = async currentTimeStamp => {
     try {
       // Retrieve the last comment timestamp from the database (in seconds)
-      const lastCommentTimestamp =
-        await this.commentsDB.getTimestamp('LAST_COMMENT_MADE');
+      const lastCommentTimestamp = await this.commentsDB.getTimestamp(
+        'LAST_COMMENT_MADE',
+      );
       if (!lastCommentTimestamp) {
         console.log('No previous comment timestamp found in the database.');
         return true; // No timestamp, allow the new comment
@@ -1652,10 +1653,8 @@ class Twitter extends Adapter {
           }
 
           // check if comment found or not
-          if (
-            data.tweets_id !== (undefined || null) &&
-            data.commentDetails.commentId !== (undefined || null)
-          ) {
+          // console.log(data.tweets_id);
+          if (data.tweets_id !== undefined) {
             this.cids.create({
               id: data.tweets_id,
               round: round,
@@ -1663,7 +1662,7 @@ class Twitter extends Adapter {
             });
             console.log('Success storing data');
           } else {
-            console.log('Failed storing data.');
+            console.log('Only scraping, no need to store data.');
           }
         } catch (e) {
           console.log(
