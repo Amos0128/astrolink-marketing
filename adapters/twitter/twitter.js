@@ -97,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        headless: false,
+        // headless: true,
         userAgent:
           'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
         args: [
@@ -256,6 +256,7 @@ class Twitter extends Adapter {
         await currentPage.waitForTimeout(await this.randomDelay(5000));
         if (!(await this.checkLogin(currentBrowser))) {
           console.log('Password is incorrect or email verification needed.');
+          namespaceWrapper.logger("error","Password is incorrect or email verification needed. Login attempt failed.", "Check your username and password! Do not use email as your username!");
           await currentPage.waitForTimeout(await this.randomDelay(5000));
           this.sessionValid = false;
           process.exit(1);
