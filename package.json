@@ -13,7 +13,8 @@
     "webpack:deploy": "yarn webpack:prod && yarn deploy",
     "deploy": "yarn install && yarn webpack && npx @_koii/create-task-cli@latest",
     "prod-debug": "nodemon --ignore 'dist/*' prod-debug.js",
-    "whammy": "yarn webpack:deploy"
+    "whammy": "yarn webpack:deploy",
+    "postinstall": "husky"
   },
   "author": "",
   "license": "ISC",
@@ -52,6 +53,7 @@
     "wink-nlp": "^2.3.0"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
     "webpack": "^5.28.0",
     "webpack-cli": "^4.5.0"
   }
