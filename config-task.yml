@@ -64,7 +64,7 @@ tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'CPscE41WQxF9j8KuwJD7GGv9yjCNZRyWLsGjS3f9V4Kp'
+task_id: 'DQp6CysTMfYFG9BNYT2FtYzcxFmb5pHPeKyD3jBCgBA2'
 
 # Provide the description for changes made in new version of task
 migrationDescription: 'Improve Performance'
