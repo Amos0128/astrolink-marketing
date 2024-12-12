@@ -97,9 +97,9 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: true,
+        headless: false,
         userAgent:
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
         args: [
           '--aggressive-cache-discard',
           '--disable-cache',
@@ -114,22 +114,16 @@ class Twitter extends Adapter {
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
-      // Emulate a specific mobile device, e.g., iPhone X
-      const iPhone = stats.puppeteer.devices['iPhone X'];
-      await this.page.emulate(iPhone);
 
       // Set a mobile viewport size
       await this.page.setViewport({
-        width: 397,
-        height: 812,
-        isMobile: true,
-        hasTouch: true,
-        deviceScaleFactor: 2,
+        width: 1280,
+        height: 960,
       });
 
       // Set a mobile user agent
       await this.page.setUserAgent(
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
       );
       console.log('Setup as mobile device complete');
       // await this.page.setViewport({ width: 1920, height: 1080 });
