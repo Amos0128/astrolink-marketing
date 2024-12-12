@@ -824,7 +824,12 @@ class Twitter extends Adapter {
       console.log('No reply button found.');
       return false;
     }
-
+    // IF BUTTON CLICKED: THEN DEFAULT CONSIDERED IT AS SUCCESS
+    const currentTimeStamp = await this.getCurrentTimestamp();
+    this.commentsDB.createTimestamp(
+      'LAST_COMMENT_MADE',
+      currentTimeStamp,
+    );
     await currentPage.waitForTimeout(await this.randomDelay(3000));
     console.log('change to post page:' + currentPage.url());
     const writeSelector = 'textarea[data-testid="tweetTextarea_0"]'; // Updated selector for the text area
@@ -888,11 +893,6 @@ class Twitter extends Adapter {
               };
               console.log('Found comment');
               // Store the current timestamp as the new 'LAST_COMMENT_MADE'
-              const currentTimeStamp = await this.getCurrentTimestamp();
-              this.commentsDB.createTimestamp(
-                'LAST_COMMENT_MADE',
-                currentTimeStamp,
-              );
 
               return commentDetails;
             }
