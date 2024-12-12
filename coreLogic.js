@@ -26,8 +26,8 @@ class CoreLogic {
     }
 
     // Set the minimum and maximum allowed runtime per day (in milliseconds)
-    const MIN_RUNTIME_PER_DAY = 8 * 60 * 60 * 1000; // 2 hours in milliseconds
-    const MAX_RUNTIME_PER_DAY = 12 * 60 * 60 * 1000; // 4 hours in milliseconds
+    const MIN_RUNTIME_PER_DAY = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+    const MAX_RUNTIME_PER_DAY = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
     // Generate a random runtime between the minimum and maximum allowed time
     const randomRuntime =
       Math.floor(
@@ -35,8 +35,8 @@ class CoreLogic {
       ) + MIN_RUNTIME_PER_DAY;
 
     // Set the minimum and maximum allowed cooldown time between task runs (in milliseconds)
-    const MIN_COOLDOWN_TIME = 3 * 60 * 60 * 1000; // 4 hours in milliseconds
-    const MAX_COOLDOWN_TIME = 6 * 60 * 60 * 1000; // 12 hours in milliseconds
+    const MIN_COOLDOWN_TIME = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+    const MAX_COOLDOWN_TIME = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
     // Generate a random cooldown time between the minimum and maximum allowed time
     const randomCooldownTime =
       Math.floor(Math.random() * (MAX_COOLDOWN_TIME - MIN_COOLDOWN_TIME + 1)) +
