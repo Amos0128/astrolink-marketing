@@ -29,7 +29,7 @@
     "compromise": "^14.14.2",
     "dotenv": "^16.0.3",
     "dotenv-webpack": "^8.1.0",
-    "eslint": "^9.5.0",
+    "eslint": "8.4.1",
     "express": "^4.18.1",
     "fs": "^0.0.1-security",
     "is-ipfs": "^8.0.4",

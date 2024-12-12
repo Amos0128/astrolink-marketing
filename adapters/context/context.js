@@ -3,7 +3,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const CONSTANT = require('../../adapters/constant');
-const { generateCharacter, askGeneralQuestion } = require('../LLaMa/LLaMa');
+const { generateCharacter } = require('../LLaMa/LLaMa');
 dotenv.config();
 
 class Context {
