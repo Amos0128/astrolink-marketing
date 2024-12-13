@@ -1511,7 +1511,7 @@ class Twitter extends Adapter {
       }
 
       // Define the random cooldown range: 30 minutes ± 5 minutes (25 to 35 minutes) in milliseconds
-      const MIN_COOLDOWN_IN_MS = 25 * 60 * 1000; // 5 minutes in milliseconds
+      const MIN_COOLDOWN_IN_MS = 25 * 60 * 1000; // 25 minutes in milliseconds
       const MAX_COOLDOWN_IN_MS = 35 * 60 * 1000; // 30 minutes in milliseconds
 
       // Generate a random cooldown between 25 and 35 minutes
