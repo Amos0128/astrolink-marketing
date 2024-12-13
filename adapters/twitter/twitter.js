@@ -250,7 +250,11 @@ class Twitter extends Adapter {
         await currentPage.waitForTimeout(await this.randomDelay(5000));
         if (!(await this.checkLogin(currentBrowser))) {
           console.log('Password is incorrect or email verification needed.');
-          namespaceWrapper.logger("error","Password is incorrect or email verification needed. Login attempt failed.", "Check your username and password! Do not use email as your username!");
+          namespaceWrapper.logger(
+            'error',
+            'Password is incorrect or email verification needed. Login attempt failed.',
+            'Check your username and password! Do not use email as your username!',
+          );
           await currentPage.waitForTimeout(await this.randomDelay(5000));
           this.sessionValid = false;
           process.exit(1);
@@ -450,8 +454,9 @@ class Twitter extends Adapter {
 
   humanType = async (page, selector, genText) => {
     // Focus on the input field
-    await page.click(selector);
-
+    if (selector !== null) {
+      await page.click(selector);
+    }
     // Use Array.from to correctly handle emojis and surrogate pairs
     const characters = Array.from(genText);
 
@@ -559,7 +564,7 @@ class Twitter extends Adapter {
   };
 
   clickArticle = async (currentPage, tweets_content, tweetId) => {
-    console.log('Target article: ' + tweets_content + ' ' + tweetId);
+    // console.log('Target article: ' + tweets_content + ' ' + tweetId);
     await currentPage.waitForTimeout(await this.randomDelay(2000));
 
     // Find the correct article container for the given tweetId or tweets_content
@@ -757,11 +762,12 @@ class Twitter extends Adapter {
     console.log('End genText *******************');
     await this.context.addToDB('Daily-GenText', genText);
 
+    await currentPage.waitForTimeout(await this.randomDelay(2000));
+
     const replybuttonSelector = 'button[data-testid="reply"]'; // Selector for the reply button
 
     // Wait for the reply button selector to appear on the page
     await currentPage.waitForSelector(replybuttonSelector, { timeout: 10000 });
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
 
     // Find all instances of the reply button
     const replyButtons = await currentPage.$$(replybuttonSelector);
@@ -820,18 +826,18 @@ class Twitter extends Adapter {
     }
     // IF BUTTON CLICKED: THEN DEFAULT CONSIDERED IT AS SUCCESS
     const currentTimeStamp = await this.getCurrentTimestamp();
-    this.commentsDB.createTimestamp(
-      'LAST_COMMENT_MADE',
-      currentTimeStamp,
-    );
+
     await currentPage.waitForTimeout(await this.randomDelay(3000));
-    console.log('change to post page:' + currentPage.url());
-    const writeSelector = 'textarea[data-testid="tweetTextarea_0"]'; // Updated selector for the text area
-    await currentPage.waitForTimeout(await this.randomDelay(1000));
-    await currentPage.click(writeSelector);
+
+    // No need to click text area again
+    // console.log('change to post page:' + currentPage.url());
+    // const writeSelector = 'textarea[data-testid="tweetTextarea_0"]'; // Updated selector for the text area
+    // await currentPage.waitForTimeout(await this.randomDelay(1000));
+    // await currentPage.click(writeSelector);
+    // await currentPage.waitForTimeout(await this.randomDelay(2000));
+
+    await this.humanType(currentPage, null, genText);
     await currentPage.waitForTimeout(await this.randomDelay(2000));
-    await this.humanType(currentPage, writeSelector, genText);
-    await currentPage.waitForTimeout(await this.randomDelay(1000));
     // Wait for the reply button to appear and be ready for interaction
     const tweetButtonSelector = 'button[data-testid="tweetButton"]';
     await currentPage.waitForSelector(tweetButtonSelector, { visible: true });
@@ -839,64 +845,48 @@ class Twitter extends Adapter {
     const tweetButton = await currentPage.$(tweetButtonSelector);
 
     if (tweetButton) {
-      const buttonBox = await tweetButton.boundingBox();
+      // click the tweet button
+      await tweetButton.click();
 
-      if (buttonBox) {
-        // Function to add a random offset to simulate human-like clicking
-        const getRandomOffset = range => {
-          return Math.floor(Math.random() * (range * 2 + 1)) - range;
-        };
+      console.log('Reply button clicked successfully!');
+      this.commentsDB.createTimestamp('LAST_COMMENT_MADE', currentTimeStamp);
+      await currentPage.waitForTimeout(await this.randomDelay(4000));
 
-        // Simulate a click on the button using mouse.click with random offsets
-        await currentPage.mouse.click(
-          buttonBox.x + buttonBox.width / 2 + getRandomOffset(5),
-          buttonBox.y + buttonBox.height / 2 + getRandomOffset(5),
-        );
+      const checkComments = await currentPage.evaluate(() => {
+        const elements = document.querySelectorAll('article[aria-labelledby]');
+        return Array.from(elements).map(element => element.outerHTML);
+      });
 
-        console.log('Reply button clicked successfully!');
-        await currentPage.waitForTimeout(await this.randomDelay(4000));
+      for (const comment of checkComments) {
+        const $ = cheerio.load(comment);
 
-        const checkComments = await currentPage.evaluate(() => {
-          const elements = document.querySelectorAll(
-            'article[aria-labelledby]',
-          );
-          return Array.from(elements).map(element => element.outerHTML);
-        });
+        const tweetUrl = $('a[href*="/status/"]').attr('href');
+        console.log(tweetUrl);
+        const tweetId = tweetUrl.split('/').pop();
+        // Find the href for the username inside each individual comment
+        const linkElement = $('a[tabindex="-1"]');
+        const href = linkElement.attr('href'); // Get the href attribute value
 
-        for (const comment of checkComments) {
-          const $ = cheerio.load(comment);
+        if (href) {
+          const user_name = href.replace('/', '').trim(); // Remove leading slash
+          // console.log('user_name:', user_name);
 
-          const tweetUrl = $('a[href*="/status/"]').attr('href');
-          console.log(tweetUrl);
-          const tweetId = tweetUrl.split('/').pop();
-          // Find the href for the username inside each individual comment
-          const linkElement = $('a[tabindex="-1"]');
-          const href = linkElement.attr('href'); // Get the href attribute value
+          if (user_name === this.username) {
+            let commentDetails = {
+              username: this.username,
+              commentId: tweetId,
+              commentText: genText,
+              comment_endpoint: commentResponse.endpoint || null,
+              marketingBriefIndex: commentResponse.marketingBriefIndex,
+            };
+            console.log('Found comment');
+            // Store the current timestamp as the new 'LAST_COMMENT_MADE'
 
-          if (href) {
-            const user_name = href.replace('/', '').trim(); // Remove leading slash
-            // console.log('user_name:', user_name);
-
-            if (user_name === this.username) {
-              let commentDetails = {
-                username: this.username,
-                commentId: tweetId,
-                commentText: genText,
-                comment_endpoint: commentResponse.endpoint || null,
-                marketingBriefIndex: commentResponse.marketingBriefIndex,
-              };
-              console.log('Found comment');
-              // Store the current timestamp as the new 'LAST_COMMENT_MADE'
-
-              return commentDetails;
-            }
+            return commentDetails;
           }
         }
-        return null;
-      } else {
-        console.log('Button bounding box not available.');
-        return null;
       }
+      return null;
     } else {
       console.log('Reply button not found.');
       return null;
@@ -954,7 +944,7 @@ class Twitter extends Adapter {
       // Function to check if the button is in the viewport
       const isButtonVisible = async box => {
         const viewport = await currentPage.viewport();
-        console.log(box);
+        // console.log(box);
         return box && box.y >= 0 && box.y + box.height <= viewport.height - 300;
       };
 
@@ -1007,7 +997,7 @@ class Twitter extends Adapter {
       // Function to check if the button is in the viewport
       const isButtonVisible = async box => {
         const viewport = await currentPage.viewport();
-        console.log(box);
+        // console.log(box);
         return box && box.y >= 0 && box.y + box.height <= viewport.height - 300;
       };
 
@@ -1208,7 +1198,7 @@ class Twitter extends Adapter {
       const salt = bcrypt.genSaltSync(saltRounds);
       const hash = bcrypt.hashSync(originData, salt);
       await this.context.addToDB('Tweet-content', tweets_content);
-      console.log('checking tweet: ', tweets_content);
+      // console.log('checking tweet: ', tweets_content);
       // click on article
       await this.clickArticle(currentPage, tweets_content, tweetId);
 
@@ -1278,7 +1268,7 @@ class Twitter extends Adapter {
           currentPage,
           tweets_content,
         );
-        // console.log('commentDetails', commentDetails);
+        console.log('commentDetails', commentDetails);
         console.log('Comment action performed, and timestamp updated.');
       } else {
         console.log('No comment action was taken due to recent activity.');
@@ -1690,7 +1680,7 @@ class Twitter extends Adapter {
       console.log('Time to take a break');
 
       // Optional: wait for a moment to allow new elements to load
-      await this.page.waitForTimeout(await this.randomDelay(2000));
+      await this.page.waitForTimeout(await this.randomDelay(300000));
       this.browser.close();
       return;
     } catch (e) {
