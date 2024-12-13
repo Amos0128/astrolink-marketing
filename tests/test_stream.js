@@ -3,7 +3,7 @@ const PCR = require('puppeteer-chromium-resolver');
 (async () => {
   let page;
   const options = {
-    revision: '1394457', // Specify the desired Chromium revision
+    revision: '1394457', // Specify the desired Chromium revision, different OS have different revisions
     forceDownload: true, // Force download to ensure the correct version
     detectionPath: '', // Default detection path
     folderName: '.chromium-browser', // Optional folder name for Chromium
@@ -17,7 +17,7 @@ const PCR = require('puppeteer-chromium-resolver');
   // Launch Puppeteer with the resolved Chromium
   const browser = await stats.puppeteer
     .launch({
-      headless: false,
+      // headless: false,
       args: ['--no-sandbox'],
       executablePath: stats.executablePath,
     })
@@ -34,7 +34,7 @@ const PCR = require('puppeteer-chromium-resolver');
 
   console.log('Go to page');
 
-  await page.goto('https://www.ritestream.io/tv/5WJWhX5H0CjUcKYfwSHpY8', {
+  await page.goto('https://www.ritestream.io/tv/5WJWhX5H0CjUcKYfwSHpY8', { // Stream URL
     waitUntil: 'networkidle2',
   });
 
