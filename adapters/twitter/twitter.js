@@ -97,7 +97,7 @@ class Twitter extends Adapter {
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
-        // headless: false,
+        headless: false,
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
         args: [
@@ -750,20 +750,7 @@ class Twitter extends Adapter {
   };
 
   clickCommentButton = async (currentPage, tweets_content) => {
-    // write a comment and post
-    console.log('Start genText *******************');
-    let commentResponse = await this.genText(tweets_content);
-    let genText = commentResponse.reply;
-    // let genText = 'Hi there!';
-    if (!genText) {
-      return;
-    }
-    console.log('genText:', genText);
-    console.log('End genText *******************');
-    await this.context.addToDB('Daily-GenText', genText);
-
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
-
+    // Find the comment button
     const replybuttonSelector = 'button[data-testid="reply"]'; // Selector for the reply button
 
     // Wait for the reply button selector to appear on the page
@@ -824,6 +811,42 @@ class Twitter extends Adapter {
       console.log('No reply button found.');
       return false;
     }
+
+    await currentPage.waitForTimeout(await this.randomDelay(2000));
+
+    // reply gif
+    const replyGifSelector = 'button[data-testid="gifSearchButton"]';
+    const replyGifButton = await currentPage.$(replyGifSelector);
+
+    if (replyGifButton) {
+      await replyGifButton.click();
+      console.log('Reply gif button clicked successfully.');
+      await this.humanType(currentPage, null, 'lol');
+
+      await currentPage.waitForTimeout(await this.randomDelay(2000));
+      
+      const gifSelector = 'div[data-testid="gifSearchGifImage"]';
+      const gif = await currentPage.$(gifSelector);
+
+      await gif.click();
+    } else {
+      console.log('Reply gif button not found.');
+    }
+
+    // write a comment and post
+    console.log('Start genText *******************');
+    let commentResponse = await this.genText(tweets_content);
+    let genText = commentResponse.reply;
+    // let genText = 'Hi there!';
+    if (!genText) {
+      return;
+    }
+    console.log('genText:', genText);
+    console.log('End genText *******************');
+    await this.context.addToDB('Daily-GenText', genText);
+
+    await currentPage.waitForTimeout(await this.randomDelay(2000));
+
     // IF BUTTON CLICKED: THEN DEFAULT CONSIDERED IT AS SUCCESS
     const currentTimeStamp = await this.getCurrentTimestamp();
 
