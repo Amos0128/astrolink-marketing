@@ -812,7 +812,7 @@ class Twitter extends Adapter {
       return false;
     }
 
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
+    await currentPage.waitForTimeout(await this.randomDelay(3000));
 
     // reply gif
     const replyGifSelector = 'button[data-testid="gifSearchButton"]';
@@ -821,6 +821,8 @@ class Twitter extends Adapter {
     if (replyGifButton) {
       await replyGifButton.click();
       console.log('Reply gif button clicked successfully.');
+      await currentPage.waitForTimeout(await this.randomDelay(2000));
+
       await this.humanType(currentPage, null, 'lol');
 
       await currentPage.waitForTimeout(await this.randomDelay(2000));
@@ -837,11 +839,11 @@ class Twitter extends Adapter {
     console.log('Start genText *******************');
     let commentResponse = await this.genText(tweets_content);
     let genText = commentResponse.reply;
+    console.log('genText:', genText);
     // let genText = 'Hi there!';
     if (!genText) {
       return;
     }
-    console.log('genText:', genText);
     console.log('End genText *******************');
     await this.context.addToDB('Daily-GenText', genText);
 
@@ -863,8 +865,6 @@ class Twitter extends Adapter {
     await currentPage.waitForTimeout(await this.randomDelay(2000));
     // Wait for the reply button to appear and be ready for interaction
     const tweetButtonSelector = 'button[data-testid="tweetButton"]';
-    await currentPage.waitForSelector(tweetButtonSelector, { visible: true });
-
     const tweetButton = await currentPage.$(tweetButtonSelector);
 
     if (tweetButton) {
