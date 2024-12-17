@@ -3,8 +3,8 @@ const Adapter = require('../../model/adapter');
 const cheerio = require('cheerio');
 const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
 const Data = require('../../model/data');
+const puppeteer = require('puppeteer-core');
 const PCR = require('puppeteer-chromium-resolver');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const fs = require('fs');
 const path = require('path');
@@ -86,41 +86,36 @@ class Twitter extends Adapter {
         await this.browser.close();
         console.log('Old browser closed');
       }
-      const options = {};
-      const userDataDir = path.join(
-        __dirname,
-        'puppeteer_cache_AIC_twitter_archive',
-      );
+      // Resolve Chromium
+      const options = {
+        revision: '1397427', // Specify a Chromium revision
+        detectionPath: './.chromium-browser-snapshots', // Path to store Chromium
+        download: true, // Automatically download Chromium
+      };
+
       const stats = await PCR(options);
-      console.log(
-        '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
-      );
-      // stats.puppeteer.use(StealthPlugin());
-      this.browser = await stats.puppeteer.launch({
-        executablePath: stats.executablePath,
-        userDataDir: userDataDir,
-        headless: false,
+      console.log('Step: Launch browser');
+
+      this.browser = await puppeteer.launch({
+        executablePath: stats.executablePath, // Dynamic Chromium executablePath
+        // headless: false,
+        args: [
+          '--disable-gpu',
+          '--disable-setuid-sandbox',
+          '--no-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-software-rasterizer',
+        ],
         userAgent:
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-        args: [
-          '--aggressive-cache-discard',
-          '--disable-cache',
-          '--disable-application-cache',
-          '--disable-offline-load-stale-cache',
-          '--disable-gpu-shader-disk-cache',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-        ],
       });
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
 
       // Set a mobile viewport size
       await this.page.setViewport({
-        width: 1280,
-        height: 960,
+        width: 1920,
+        height: 1080,
       });
 
       // Set a mobile user agent
@@ -128,7 +123,7 @@ class Twitter extends Adapter {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
       );
       // await this.page.setViewport({ width: 1920, height: 1080 });
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
       await this.twitterLogin(this.page, this.browser);
       return true;
     } catch (e) {
@@ -205,7 +200,7 @@ class Twitter extends Adapter {
         );
 
         await currentPage.keyboard.press('Enter');
-        await currentPage.waitForTimeout(await this.randomDelay(5000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(5000)));
 
         const twitter_verify = await currentPage
           .waitForSelector('input[data-testid="ocfEnterTextTextInput"]', {
@@ -248,7 +243,7 @@ class Twitter extends Adapter {
 
         console.log('Step: Click login button');
         await currentPage.keyboard.press('Enter');
-        await currentPage.waitForTimeout(await this.randomDelay(5000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(5000)));
         if (!(await this.checkLogin(currentBrowser))) {
           console.log('Password is incorrect or email verification needed.');
           namespaceWrapper.logger(
@@ -256,18 +251,18 @@ class Twitter extends Adapter {
             'Password is incorrect or email verification needed. Login attempt failed.',
             'Check your username and password! Do not use email as your username!',
           );
-          await currentPage.waitForTimeout(await this.randomDelay(5000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(5000)));
           this.sessionValid = false;
           process.exit(1);
         } else if (await this.isEmailVerificationRequired(currentPage)) {
           console.log('Email verification required.');
           this.sessionValid = false;
-          await currentPage.waitForTimeout(await this.randomDelay(10000));
+            await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
           process.exit(1);
         } else {
           console.log('Password is correct.');
           currentPage.waitForNavigation({ waitUntil: 'load' });
-          await currentPage.waitForTimeout(await this.randomDelay(10000));
+            await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
           this.sessionValid = true;
           this.lastSessionCheck = Date.now();
@@ -305,7 +300,7 @@ class Twitter extends Adapter {
       // set the cookies
       await currentPage.setCookie(...cookies[0].data);
       await currentPage.goto('https://x.com/home');
-      await currentPage.waitForTimeout(await this.randomDelay(3000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
 
       const isLoggedIn =
         (await currentPage.url()) !==
@@ -332,9 +327,9 @@ class Twitter extends Adapter {
 
   checkLogin = async currentBrowser => {
     const newPage = await currentBrowser.newPage();
-    await newPage.waitForTimeout(await this.randomDelay(2000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
     await newPage.goto('https://x.com/home');
-    await newPage.waitForTimeout(await this.randomDelay(4000));
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(4000)));
     // Replace the selector with a Twitter-specific element that indicates a logged-in state
     const isLoggedIn =
       (await newPage.url()) !==
@@ -348,14 +343,14 @@ class Twitter extends Adapter {
       console.log('No valid cookies found, proceeding with manual login');
       this.sessionValid = false;
     }
-    await newPage.waitForTimeout(await this.randomDelay(2000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
     await newPage.close();
     return this.sessionValid;
   };
 
   isEmailVerificationRequired = async currentPage => {
     // Wait for some time to allow the page to load the required elements
-    await currentPage.waitForTimeout(await this.randomDelay(5000));
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(5000)));
 
     // Check if the specific text is present on the page
     const textContent = await currentPage.evaluate(
@@ -468,8 +463,7 @@ class Twitter extends Adapter {
       // Check if the character is an emoji or special character (non-ASCII)
       if (char.match(/[\u{1F600}-\u{1F6FF}]/u) || char.match(/[^\x00-\x7F]/)) {
         // Use page.type for emojis and other non-ASCII characters
-        const emojiDelay = Math.random() * 1000 + 500;
-        await page.waitForTimeout(emojiDelay);
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(1000)));
         await page.type(selector, char);
       } else {
         // Use keyboard.press for normal characters
@@ -486,12 +480,12 @@ class Twitter extends Adapter {
 
       // Randomly vary typing speed to mimic human behavior
       const typingSpeed = Math.random() * 250 + 50;
-      await page.waitForTimeout(typingSpeed);
+      await new Promise(resolve => setTimeout(resolve, typingSpeed));
 
       // Randomly add "thinking pauses" after some words
       if (char === ' ' && Math.random() < 0.2) {
         const thinkingPause = Math.random() * 1500 + 500;
-        await page.waitForTimeout(thinkingPause);
+        await new Promise(resolve => setTimeout(resolve, thinkingPause));
       }
 
       // Randomly simulate small typing errors and corrections
@@ -501,14 +495,14 @@ class Twitter extends Adapter {
           Math.floor(Math.random() * 26) + 97,
         ); // Random lowercase letter
         await page.keyboard.type(errorChar); // Type incorrect character
-        await page.waitForTimeout(typingSpeed / 0.8); // Short delay after mistake
+        await new Promise(resolve => setTimeout(resolve, typingSpeed/0.8)); // Short delay after mistake
         await page.keyboard.press('Backspace'); // Correct the mistake
       }
 
       // Randomly add a longer pause to mimic thinking (more rarely)
       if (Math.random() < 0.1) {
         const longPause = Math.random() * 2000 + 500;
-        await page.waitForTimeout(longPause);
+        await new Promise(resolve => setTimeout(resolve, longPause));
       }
     }
 
@@ -519,7 +513,7 @@ class Twitter extends Adapter {
     );
 
     // Simulate random mouse movement during the pause
-    await page.waitForTimeout(finishDelay);
+    await new Promise(resolve => setTimeout(resolve, finishDelay));
   };
 
   // clean text
@@ -538,7 +532,7 @@ class Twitter extends Adapter {
         targetX - (targetX / steps) * (steps - i),
         targetY - (targetY / steps) * (steps - i),
       );
-      await page.waitForTimeout(await this.randomDelay(1000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(1000)));
     }
   };
 
@@ -566,7 +560,7 @@ class Twitter extends Adapter {
 
   clickArticle = async (currentPage, tweets_content, tweetId) => {
     // console.log('Target article: ' + tweets_content + ' ' + tweetId);
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
     // Find the correct article container for the given tweetId or tweets_content
     const articleContainer = await this.getArticleContainer(
@@ -605,7 +599,7 @@ class Twitter extends Adapter {
       if (scrollAmount <= 0) break;
 
       await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 60, 10);
-      await currentPage.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       textBox = await textContentContainer.boundingBox();
     }
@@ -624,7 +618,7 @@ class Twitter extends Adapter {
         console.log('Backup evaluate click executed.');
       }
 
-      await currentPage.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       const currentUrl = currentPage.url();
       if (currentUrl.includes('/photo/')) {
@@ -670,7 +664,7 @@ class Twitter extends Adapter {
       }
 
       // await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2);
-      await currentPage.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       let buttonBox = await likeButton.boundingBox();
 
@@ -691,7 +685,7 @@ class Twitter extends Adapter {
         if (scrollAmount <= 0) break;
 
         await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 70, 10);
-        await currentPage.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
         buttonBox = await likeButton.boundingBox();
       }
@@ -708,7 +702,7 @@ class Twitter extends Adapter {
             'Post is already liked (unlike button present). No action taken.',
           );
         } else {
-          await currentPage.waitForTimeout(await this.randomDelay(1000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(1000)));
           try {
             await likeButton.click(); // Attempt direct click on the like button
             console.log('Like button clicked successfully.');
@@ -718,7 +712,7 @@ class Twitter extends Adapter {
             await currentPage.evaluate(el => el.click(), likeButton);
             console.log('Fallback evaluate click executed.');
           }
-          await currentPage.waitForTimeout(await this.randomDelay(2000));
+            await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
         }
       } else {
         console.error('Like button is not visible or clickable.');
@@ -789,7 +783,7 @@ class Twitter extends Adapter {
         if (scrollAmount <= 0) break;
 
         await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 70, 10);
-        await currentPage.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
         replybuttonBox = await replyButton.boundingBox();
       }
@@ -813,7 +807,7 @@ class Twitter extends Adapter {
       return false;
     }
 
-    await currentPage.waitForTimeout(await this.randomDelay(3000));
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
 
     // reply gif
     const replyGifSelector = 'button[data-testid="gifSearchButton"]';
@@ -822,12 +816,12 @@ class Twitter extends Adapter {
     if (replyGifButton) {
       await replyGifButton.click();
       console.log('Reply gif button clicked successfully.');
-      await currentPage.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       await this.humanType(currentPage, null, 'lol');
 
-      await currentPage.waitForTimeout(await this.randomDelay(2000));
-      
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
+
       const gifSelector = 'div[data-testid="gifSearchGifImage"]';
       const gif = await currentPage.$(gifSelector);
 
@@ -848,22 +842,15 @@ class Twitter extends Adapter {
     console.log('End genText *******************');
     await this.context.addToDB('Daily-GenText', genText);
 
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
     // IF BUTTON CLICKED: THEN DEFAULT CONSIDERED IT AS SUCCESS
     const currentTimeStamp = await this.getCurrentTimestamp();
 
-    await currentPage.waitForTimeout(await this.randomDelay(3000));
-
-    // No need to click text area again
-    // console.log('change to post page:' + currentPage.url());
-    // const writeSelector = 'textarea[data-testid="tweetTextarea_0"]'; // Updated selector for the text area
-    // await currentPage.waitForTimeout(await this.randomDelay(1000));
-    // await currentPage.click(writeSelector);
-    // await currentPage.waitForTimeout(await this.randomDelay(2000));
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
 
     await this.humanType(currentPage, null, genText);
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
     // Wait for the reply button to appear and be ready for interaction
     const tweetButtonSelector = 'button[data-testid="tweetButton"]';
     const tweetButton = await currentPage.$(tweetButtonSelector);
@@ -874,7 +861,7 @@ class Twitter extends Adapter {
 
       console.log('Reply button clicked successfully!');
       this.commentsDB.createTimestamp('LAST_COMMENT_MADE', currentTimeStamp);
-      await currentPage.waitForTimeout(await this.randomDelay(4000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(4000)));
 
       const checkComments = await currentPage.evaluate(() => {
         const elements = document.querySelectorAll('article[aria-labelledby]');
@@ -919,7 +906,7 @@ class Twitter extends Adapter {
 
   clickBackButton = async currentPage => {
     await this.slowFingerSlide(this.page, 120, 200, 200, 400, 1, 25); // Slide up to make sure back button is visible
-    await currentPage.waitForTimeout(await this.randomDelay(2000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
     const backButtonSelector = 'button[data-testid="app-bar-back"]';
 
     // Wait for the back button to appear and be visible
@@ -983,7 +970,7 @@ class Twitter extends Adapter {
         if (scrollAmount <= 0) break;
 
         await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
-        await currentPage.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
         // Check if the button has become visible
         buttonBox = await verifiedIcon.boundingBox();
       }
@@ -1036,7 +1023,7 @@ class Twitter extends Adapter {
         if (scrollAmount <= 0) break;
 
         await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
-        await currentPage.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
         // Check if the button has become visible
         buttonBox = await followButton.boundingBox();
       }
@@ -1063,7 +1050,7 @@ class Twitter extends Adapter {
     const exploreLinkSelector = 'a[data-testid="AppTabBar_Explore_Link"]';
     await currentPage.waitForSelector(exploreLinkSelector, { visible: true });
 
-    await currentPage.waitForTimeout(await this.randomDelay(3000));
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
     const exploreLink = await currentPage.$(exploreLinkSelector);
 
     if (exploreLink) {
@@ -1075,7 +1062,9 @@ class Twitter extends Adapter {
           linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
           linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
         );
-        await currentPage.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve =>
+          setTimeout(resolve, this.randomDelay(3000)),
+        );
         if (currentPage.url().includes('explore')) {
           console.log('Explore link clicked successfully!');
         } else {
@@ -1084,7 +1073,9 @@ class Twitter extends Adapter {
             linkBox.x + linkBox.width / 2 + this.getRandomOffset(5),
             linkBox.y + linkBox.height / 2 + this.getRandomOffset(5),
           );
-          await currentPage.waitForTimeout(await this.randomDelay(3000));
+          await new Promise(resolve =>
+            setTimeout(resolve, this.randomDelay(3000)),
+          );
           if (currentPage.url().includes('explore')) {
             console.log('Explore link clicked successfully!');
           }
@@ -1226,7 +1217,7 @@ class Twitter extends Adapter {
       // click on article
       await this.clickArticle(currentPage, tweets_content, tweetId);
 
-      await currentPage.waitForTimeout(await this.randomDelay(3000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
 
       // // Click like button (now unused)
       // const commentContainer = await this.getCommentContainer(
@@ -1251,7 +1242,7 @@ class Twitter extends Adapter {
       //   console.log('Comment container not found for the tweet.');
       // }
 
-      // await currentPage.waitForTimeout(await this.randomDelay(3000));
+      //       await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
 
       // Check if already posted the comment
       let isAlreadComment = false;
@@ -1303,7 +1294,7 @@ class Twitter extends Adapter {
 
         for (let i = 0; i < 3; i++) {
           await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 10);
-          await currentPage.waitForTimeout(await this.randomDelay(2000));
+            await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
           // // Fetch the current comments
           // const comments = await currentPage.evaluate(() => {
@@ -1316,7 +1307,6 @@ class Twitter extends Adapter {
           // // console.log('Found comments: ', comments.length);
 
           // for (const comment of comments) {
-          //   await currentPage.waitForTimeout(await this.randomDelay(500));
           //   const $ = cheerio.load(comment);
           //   const commentText = $('div[data-testid="tweetText"]').text().trim(); // Get comment text
 
@@ -1465,9 +1455,9 @@ class Twitter extends Adapter {
       const checkEmail = emailRegex.test(query.username);
       if (checkEmail) {
         // get the username from the home
-        await this.page.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
         await this.page.goto('https://x.com/home');
-        await this.page.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
         const loggedInUsername = await this.page.evaluate(() => {
           const elements = document.querySelectorAll(
             '[data-testid^="UserAvatar-Container-"]',
@@ -1487,7 +1477,7 @@ class Twitter extends Adapter {
           }
           return username ? username : 'No username found';
         });
-        await this.page.waitForTimeout(await this.randomDelay(2000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
         if (loggedInUsername && loggedInUsername !== 'No username found') {
           this.username = loggedInUsername;
           await this.fetchList(query.query, query.round, query.searchTerm);
@@ -1591,19 +1581,19 @@ class Twitter extends Adapter {
       const searchInputSelector = 'input[data-testid="SearchBox_Search_Input"]';
       await this.clickInputBox(this.page, searchInputSelector);
 
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       await this.humanType(this.page, searchInputSelector, searchTerm);
 
       // hit enter
       await this.page.keyboard.press('Enter');
 
-      await this.page.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       // await this.clickLatest(this.page);
       await this.clickPeople(this.page);
 
-      await this.page.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       console.log('fetching list for ', this.page.url());
 
@@ -1625,7 +1615,7 @@ class Twitter extends Adapter {
       }
 
       console.log('Waiting for tweets loaded');
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       // get the users
       await this.page.evaluate(() => {
@@ -1635,7 +1625,7 @@ class Twitter extends Adapter {
         elements.forEach(element => element.click());
       });
 
-      await this.page.waitForTimeout(await this.randomDelay(4500));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(4500)));
 
       // get the articles
       const items = await this.page.evaluate(() => {
@@ -1643,20 +1633,20 @@ class Twitter extends Adapter {
         return Array.from(elements).map(element => element.outerHTML);
       });
       console.log('Found items: ', items.length);
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       // loop the articles
       for (const item of items) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // @soma Nice delay timer, never thought of doing it this way
         try {
-          await this.page.waitForTimeout(await this.randomDelay(2000));
+            await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
           // add the comment on the post
           let data = await this.parseItem(item, url, this.page, this.browser);
           console.log('data', data);
           if (data === false) {
             // Try again
             console.log('Try again');
-            await this.page.waitForTimeout(await this.randomDelay(2000));
+              await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
             await this.fetchList(url, round, searchTerm);
             break;
           }
@@ -1683,28 +1673,28 @@ class Twitter extends Adapter {
 
       await this.clickExploreButton(this.page);
 
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       // Call the function to perform the slow slide
       await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
 
       // Follow user
-      await this.page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       await this.clickVerifiedUser(this.page);
 
-      await this.page.waitForTimeout(await this.randomDelay(4000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(4000)));
 
       await this.clickFollowButton(this.page);
 
-      await this.page.waitForTimeout(await this.randomDelay(2000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(2000)));
 
       await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
 
       console.log('Time to take a break');
 
       // Optional: wait for a moment to allow new elements to load
-      await this.page.waitForTimeout(await this.randomDelay(300000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(1800000)));
       this.browser.close();
       return;
     } catch (e) {
@@ -1728,7 +1718,7 @@ class Twitter extends Adapter {
       await page.touchscreen.touchMove(currentX, currentY);
 
       // Wait for a short period to slow down the slide
-      await page.waitForTimeout(delay);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
     // End the touch event
@@ -1933,7 +1923,7 @@ class Twitter extends Adapter {
       console.log(
         '*****************************************CALLED Audit VERIFIER*****************************************',
       );
-      let auditBrowser = await stats.puppeteer.launch({
+      let auditBrowser = await puppeteer.launch({
         executablePath: stats.executablePath,
         // headless: false,
         userAgent:
@@ -1954,13 +1944,13 @@ class Twitter extends Adapter {
       await verify_page.setUserAgent(
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       );
-      await verify_page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
       await verify_page.setViewport({ width: 1024, height: 4000 });
-      await verify_page.waitForTimeout(await this.randomDelay(3000));
+        await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
       // go to the comment page
       const url = `https://x.com/${inputItem.commentDetails.username}/status/${inputItem.commentDetails.commentId}`;
       await verify_page.goto(url, { timeout: 60000 });
-      await verify_page.waitForTimeout(await this.randomDelay(4000));
+      await new Promise(resolve => setTimeout(resolve, this.randomDelay(4000)));
 
       // check if the page gave 404
       let confirmed_no_tweet = false;
@@ -2005,7 +1995,7 @@ class Twitter extends Adapter {
           return false;
         }
       } else {
-        await verify_page.waitForTimeout(await this.randomDelay(3000));
+          await new Promise(resolve => setTimeout(resolve, this.randomDelay(3000)));
         auditBrowser.close();
         return false;
       }
@@ -2019,7 +2009,7 @@ class Twitter extends Adapter {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);
     });
-    await page.waitForTimeout(5000); // Adjust the timeout as necessary
+    await new Promise(resolve => setTimeout(resolve, this.randomDelay(5000))); // Adjust the timeout as necessary
   };
 
   /**

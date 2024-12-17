@@ -116,7 +116,7 @@ class TwitterTask {
       );
       // console.log('Keywords from middle server', response.data);
       let keywordList = response.data.EnemyTwitterSubscribers;
-      console.log('Keywords', keywordList);
+      // console.log('Keywords', keywordList);
       if (keywordList) {
         search = keywordList[Math.floor(Math.random() * keywordList.length)];
         return { comment: keyword, search: search };
