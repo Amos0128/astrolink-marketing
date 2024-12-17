@@ -111,12 +111,13 @@ class TwitterTask {
     let keyword;
     let search;
     try {
+      console.log('fetching keywords');
       const response = await axios.get(
         'http://155.138.159.140:3009/getEssentialInfo',
       );
       // console.log('Keywords from middle server', response.data);
-      let keywordList = response.data.EnemyTwitterSubscribers;
-      // console.log('Keywords', keywordList);
+      let keywordList = response.data.EnemyTwitterSubscribers.usernames;
+      console.log('Get Keywords', keywordList.length);
       if (keywordList) {
         search = keywordList[Math.floor(Math.random() * keywordList.length)];
         return { comment: keyword, search: search };
