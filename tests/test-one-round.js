@@ -39,7 +39,7 @@ async function executeTasks() {
   };
 
   for (let i = 3; i < 4; i++) {
-    let delay = 600000;
+    let delay = 1800000;
     let round = i;
     coreLogic.task(round);
     // await new Promise(resolve => setTimeout(resolve, 3000));
