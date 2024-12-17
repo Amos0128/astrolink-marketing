@@ -4,6 +4,7 @@ const cheerio = require('cheerio');
 const { KoiiStorageClient } = require('@_koii/storage-task-sdk');
 const Data = require('../../model/data');
 const PCR = require('puppeteer-chromium-resolver');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const fs = require('fs');
 const path = require('path');
@@ -94,6 +95,7 @@ class Twitter extends Adapter {
       console.log(
         '*****************************************CALLED PURCHROMIUM RESOLVER*****************************************',
       );
+      // stats.puppeteer.use(StealthPlugin());
       this.browser = await stats.puppeteer.launch({
         executablePath: stats.executablePath,
         userDataDir: userDataDir,
@@ -125,7 +127,6 @@ class Twitter extends Adapter {
       await this.page.setUserAgent(
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
       );
-      console.log('Setup as mobile device complete');
       // await this.page.setViewport({ width: 1920, height: 1080 });
       await this.page.waitForTimeout(await this.randomDelay(3000));
       await this.twitterLogin(this.page, this.browser);
