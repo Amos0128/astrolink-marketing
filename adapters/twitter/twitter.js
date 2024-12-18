@@ -619,7 +619,7 @@ class Twitter extends Adapter {
 
       if (scrollAmount <= 0) break;
 
-      await this.humanLikeScroll(page, scrollAmount, 5, 10);
+      await this.humanLikeScroll(currentPage, scrollAmount, 5, 10);
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       textBox = await textContentContainer.boundingBox();
