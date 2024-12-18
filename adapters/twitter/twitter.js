@@ -841,7 +841,11 @@ class Twitter extends Adapter {
       console.log('Reply gif button clicked successfully.');
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      await this.humanType(currentPage, null, 'lol');
+      let gifKeywordList = ['lol', 'great', 'funny', 'haha', 'wow', 'amazing'];
+      let randomIndex = Math.floor(Math.random() * gifKeywordList.length);
+      let gifKeyword = gifKeywordList[randomIndex];
+
+      await this.humanType(currentPage, null, gifKeyword);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
