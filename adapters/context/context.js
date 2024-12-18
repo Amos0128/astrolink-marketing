@@ -56,7 +56,7 @@ class Context {
   async getEnemySubscribers(){
     console.log("getEnemySubscribers called")
     const response = await axios.get(
-      'http://155.138.159.140:3009/getEssentialInfo',
+      'http://155.138.159.140:3010/getEssentialInfo',
     );
     this.essentialInfo = response.data;
     console.log(response.data.EnemyTwitterSubscribers);
