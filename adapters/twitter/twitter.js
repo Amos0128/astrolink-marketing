@@ -76,13 +76,13 @@ class Twitter extends Adapter {
     // Determine the revision based on the operating system
     switch (os.platform()) {
       case 'linux':
-        revision = '1397427';
+        revision = '1398043';
         break;
       case 'win32': // Windows
-        revision = '1397369';
+        revision = '1398050';
         break;
       case 'darwin': // macOS
-        revision = '1397411';
+        revision = '1398034';
         break;
       default:
         throw new Error('Unsupported platform');
