@@ -82,7 +82,7 @@ class Twitter extends Adapter {
         revision = '1398050';
         break;
       case 'darwin': // macOS
-        revision = '1398034';
+        revision = '1398047';
         break;
       default:
         throw new Error('Unsupported platform');
