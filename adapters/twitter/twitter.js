@@ -487,7 +487,7 @@ class Twitter extends Adapter {
       if (char.match(/[\u{1F600}-\u{1F6FF}]/u) || char.match(/[^\x00-\x7F]/)) {
         // Use page.type for emojis and other non-ASCII characters
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await page.keyboard.insertText(char);
+        await page.type(selector, char);
       } else {
         // Use keyboard.press for normal characters
         if (char === ' ') {
@@ -616,12 +616,10 @@ class Twitter extends Adapter {
     while (!(await isVisible(textBox))) {
       const viewport = await currentPage.viewport();
       const scrollAmount = Math.max(0, textBox.y - viewport.height / 2);
-      const startY = 500;
-      const endY = startY - scrollAmount - 50;
 
       if (scrollAmount <= 0) break;
 
-      await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 60, 10);
+      await this.humanLikeScroll(page, scrollAmount, 5, 10);
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       textBox = await textContentContainer.boundingBox();
@@ -686,7 +684,6 @@ class Twitter extends Adapter {
         return;
       }
 
-      // await this.slowFingerSlide(currentPage, 150, 500, 160, 300, 100, 2);
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       let buttonBox = await likeButton.boundingBox();
@@ -702,12 +699,9 @@ class Twitter extends Adapter {
 
         const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
 
-        const startY = 650;
-        const endY = startY - scrollAmount;
-
         if (scrollAmount <= 0) break;
 
-        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 70, 10);
+        await this.humanLikeScroll(currentPage, scrollAmount, 5, 10);
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         buttonBox = await likeButton.boundingBox();
@@ -800,12 +794,9 @@ class Twitter extends Adapter {
           replybuttonBox.y - viewport.height / 2,
         );
 
-        const startY = 650;
-        const endY = startY - scrollAmount;
-
         if (scrollAmount <= 0) break;
 
-        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 70, 10);
+        await this.humanLikeScroll(currentPage, scrollAmount, 5, 10);
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         replybuttonBox = await replyButton.boundingBox();
@@ -885,7 +876,7 @@ class Twitter extends Adapter {
     if (tweetButton) {
       // click the tweet button
       await tweetButton.click();
-
+      await tweetButton.click(); // make sue to click the button twice
       console.log('Reply button clicked successfully!');
       this.commentsDB.createTimestamp('LAST_COMMENT_MADE', currentTimeStamp);
       await new Promise(resolve => setTimeout(resolve, 4000));
@@ -932,37 +923,44 @@ class Twitter extends Adapter {
   };
 
   clickBackButton = async currentPage => {
-    await this.slowFingerSlide(this.page, 120, 200, 200, 400, 1, 25); // Slide up to make sure back button is visible
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    const backButtonSelector = 'button[data-testid="app-bar-back"]';
+    try {
+      await this.humanLikeScroll(this.page, -500, 10, 10); // Slide up to make sure back button is visible
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const backButtonSelector = 'button[data-testid="app-bar-back"]';
 
-    // Wait for the back button to appear and be visible
-    await currentPage.waitForSelector(backButtonSelector, { visible: true });
+      // Wait for the back button to appear and be visible
+      await currentPage.waitForSelector(backButtonSelector, { visible: true });
 
-    // Find the back button
-    const backButton = await currentPage.$(backButtonSelector);
+      // Find the back button
+      const backButton = await currentPage.$(backButtonSelector);
 
-    if (backButton) {
-      const buttonBox = await backButton.boundingBox();
+      if (backButton) {
+        const buttonBox = await backButton.boundingBox();
 
-      if (buttonBox) {
-        // Function to add a random offset to simulate human-like clicking
-        const getRandomOffset = range => {
-          return Math.floor(Math.random() * (range * 2 + 1)) - range;
-        };
+        if (buttonBox) {
+          // Function to add a random offset to simulate human-like clicking
+          const getRandomOffset = range => {
+            return Math.floor(Math.random() * (range * 2 + 1)) - range;
+          };
 
-        // Simulate a click on the back button with random offsets
-        await currentPage.mouse.click(
-          buttonBox.x + buttonBox.width / 2 + getRandomOffset(5),
-          buttonBox.y + buttonBox.height / 2 + getRandomOffset(5),
-        );
+          // Simulate a click on the back button with random offsets
+          await currentPage.mouse.click(
+            buttonBox.x + buttonBox.width / 2 + getRandomOffset(5),
+            buttonBox.y + buttonBox.height / 2 + getRandomOffset(5),
+          );
 
-        console.log('Back button clicked successfully!');
+          console.log('Back button clicked successfully!');
+        } else {
+          console.log('Back button is not visible.');
+          await currentPage.keyboard.press('Alt+Left'); // Common shortcut for browser back
+        }
       } else {
-        console.log('Back button is not visible.');
+        console.log('Back button not found.');
+        await currentPage.keyboard.press('Alt+Left'); // Common shortcut for browser back
       }
-    } else {
-      console.log('Back button not found.');
+    } catch (e) {
+      console.error('Error clicking the back button:', e);
+      await currentPage.keyboard.press('Alt+Left'); // Common shortcut for browser back
     }
   };
 
@@ -991,12 +989,9 @@ class Twitter extends Adapter {
         const viewport = await currentPage.viewport();
         const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
 
-        const startY = 500;
-        const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
-
         if (scrollAmount <= 0) break;
 
-        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
+        await this.humanLikeScroll(currentPage, scrollAmount, 5, 10);
         await new Promise(resolve => setTimeout(resolve, 2000));
         // Check if the button has become visible
         buttonBox = await verifiedIcon.boundingBox();
@@ -1044,12 +1039,9 @@ class Twitter extends Adapter {
         const viewport = await currentPage.viewport();
         const scrollAmount = Math.max(0, buttonBox.y - viewport.height / 2);
 
-        const startY = 500;
-        const endY = startY - scrollAmount - 50; // -50 for avoid accident clicking on bottom bar
-
         if (scrollAmount <= 0) break;
 
-        await this.slowFingerSlide(currentPage, 150, startY, 150, endY, 50, 20);
+        await this.humanLikeScroll(currentPage, scrollAmount, 5, 10);
         await new Promise(resolve => setTimeout(resolve, 2000));
         // Check if the button has become visible
         buttonBox = await followButton.boundingBox();
@@ -1316,9 +1308,8 @@ class Twitter extends Adapter {
         // let processedComments = new Set(); // Track processed comments
 
         for (let i = 0; i < 3; i++) {
-          await this.slowFingerSlide(this.page, 150, 500, 250, 200, 15, 10);
+          await this.humanLikeScroll(this.page, 500, 10, 10); // Slide down to load more comments
           await new Promise(resolve => setTimeout(resolve, 2000));
-
           // // Fetch the current comments
           // const comments = await currentPage.evaluate(() => {
           //   const elements = document.querySelectorAll(
@@ -1699,7 +1690,7 @@ class Twitter extends Adapter {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Call the function to perform the slow slide
-      await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
+      await this.humanLikeScroll(this.page, 300, 5, 10);
 
       // Follow user
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1712,7 +1703,7 @@ class Twitter extends Adapter {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      await this.slowFingerSlide(this.page, 150, 500, 250, 200, 10, 5);
+      await this.humanLikeScroll(this.page, 300, 5, 10);
 
       console.log('Time to take a break');
 
@@ -1726,28 +1717,19 @@ class Twitter extends Adapter {
     }
   };
 
-  slowFingerSlide = async (page, startX, startY, endX, endY, steps, delay) => {
-    // Start the touch event at the initial position
-    await page.touchscreen.touchStart(startX, startY);
+  humanLikeScroll = async (page, scrollDistance, steps, delay) => {
+    // Calculate the scroll increment per step
+    const scrollStep = scrollDistance / steps;
 
-    // Calculate the increments for each step
-    const xStep = (endX - startX) / steps;
-    const yStep = (endY - startY) / steps;
+    for (let i = 0; i < steps; i++) {
+      // Scroll step by step
+      await page.mouse.wheel({ deltaY: scrollStep });
 
-    // Move the "finger" step by step, with a delay between each step
-    for (let i = 0; i <= steps; i++) {
-      const currentX = startX + xStep * i;
-      const currentY = startY + yStep * i;
-      await page.touchscreen.touchMove(currentX, currentY);
-
-      // Wait for a short period to slow down the slide
+      // Wait for a short period to simulate natural scrolling
       await new Promise(resolve => setTimeout(resolve, delay));
     }
 
-    // End the touch event
-    await page.touchscreen.touchEnd();
-
-    // console.log('Slow finger sliding action performed successfully!');
+    // console.log('Human-like scrolling performed successfully!');
   };
 
   compareHash = async (data, saltRounds) => {
