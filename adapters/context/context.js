@@ -53,6 +53,13 @@ class Context {
     return this.essentialInfo.MarketBrief;
   }
 
+  async getUserIndex(){
+    if (this.essentialInfo == null){
+      return "N/A";
+    }
+    return this.essentialInfo.index;
+  }
+
   async getEnemySubscribers(){
     console.log("getEnemySubscribers called")
     const response = await axios.get(
@@ -60,7 +67,7 @@ class Context {
     );
     this.essentialInfo = response.data;
     console.log(response.data.EnemyTwitterSubscribers);
-    return response.data.EnemyTwitterSubscribers.usernames;
+    return response.data.EnemyTwitterSubscribers;
   }
   // // Get the context
   // async getContext(){

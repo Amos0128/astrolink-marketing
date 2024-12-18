@@ -1416,13 +1416,14 @@ class Twitter extends Adapter {
     const character = await this.context.getOrCreateCharacter();
     // const tweetsInfo = await this.context.getOrCreateTweetsInfo();
     const marketingBriefResponse = await this.context.getMarketingBrief();
+    const userIndex = await this.context.getUserIndex();
     const marketingBrief = marketingBriefResponse.randomBrief;
     const commentResponse = await askForComment(
       textToRead,
       character,
       marketingBrief,
     );
-    commentResponse.marketingBriefIndex = marketingBriefResponse.randomIndex;
+    commentResponse.marketingBriefIndex = userIndex;
     return commentResponse;
   }
 
