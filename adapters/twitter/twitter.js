@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const nlp = require('compromise');
-const { Context } = require('../context/context');
+const context = require('../context/context');
 const os = require('os');
 const {
   // askGeneralQuestion,
@@ -47,7 +47,7 @@ class Twitter extends Adapter {
     this.comment = '';
     this.meme = '';
     this.username = '';
-    this.context = new Context();
+    this.context = context;
   }
 
   /**
@@ -106,7 +106,7 @@ class Twitter extends Adapter {
    * 5. Queue twitterLogin()
    */
   negotiateSession = async () => {
-    await this.context.initialized();
+    await this.context.initializeContext();
     try {
       if (this.browser) {
         await this.browser.close();

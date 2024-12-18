@@ -4,12 +4,14 @@ const dotenv = require('dotenv');
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const CONSTANT = require('../../adapters/constant');
 const { generateCharacter } = require('../LLaMa/LLaMa');
+const axios = require('axios');
 dotenv.config();
 
 class Context {
   constructor() {
     this.db = null;
     this._initializationPromise = this.initializeContext();
+    this.essentialInfo = null;      
   }
 
   async initialized() {
@@ -44,12 +46,20 @@ class Context {
   }
 
   async getMarketingBrief() {
-    const marketingBriefServer = 'http://155.138.159.140:3009/getEssentialInfo';
-    const response = await fetch(marketingBriefServer);
-    const data = await response.json();
-    const randomIndex = Math.floor(Math.random() * data.MarketBrief.length);
-    const randomBrief = data.MarketBrief[randomIndex][0];
-    return { randomIndex, randomBrief };
+    console.log("getMarketingBrief called");
+    if (this.essentialInfo == null){
+      return "Please generate a funny interesting comment!"
+    }
+    return this.essentialInfo.MarketBrief;
+  }
+
+  async getEnemySubscribers(){
+    console.log("getEnemySubscribers called")
+    const response = await axios.get(
+      'http://155.138.159.140:3009/getEssentialInfo',
+    );
+    this.essentialInfo = response.data;
+    return response.data.EnemyTwitterSubscribers;
   }
   // // Get the context
   // async getContext(){
@@ -167,4 +177,5 @@ class Context {
 //     console.log(character);
 // }
 // test();
-module.exports = { Context };
+const context = new Context();
+module.exports = context;

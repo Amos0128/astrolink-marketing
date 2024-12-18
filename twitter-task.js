@@ -8,7 +8,7 @@ const fs = require('fs');
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const { default: axios } = require('axios');
 const { error } = require('console');
-
+const context = require('./adapters/context/context');
 async function isValidCID(cid) {
   try {
     CID.parse(cid);
@@ -55,7 +55,9 @@ class TwitterTask {
     this.username = '';
     this.db = new Data('db', []);
     this.db.initializeData();
+    this.context = context;
     this.initialize();
+ 
 
     this.setAdapter = async () => {
       const username = process.env.TWITTER_USERNAME;
@@ -85,6 +87,7 @@ class TwitterTask {
   async initialize() {
     try {
       console.log('initializing twitter task');
+      await this.context.initializeContext();
       const { comment, search } = await this.fetchSearchTerms();
       this.comment = comment;
       this.searchTerm = search;
@@ -116,7 +119,7 @@ class TwitterTask {
         'http://155.138.159.140:3009/getEssentialInfo',
       );
       // console.log('Keywords from middle server', response.data);
-      let keywordList = response.data.EnemyTwitterSubscribers.usernames;
+      let keywordList = await this.context.getEnemySubscribers();
       console.log('Get Keywords', keywordList.length);
       if (keywordList) {
         search = keywordList[Math.floor(Math.random() * keywordList.length)];

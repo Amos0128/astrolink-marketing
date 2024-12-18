@@ -125,7 +125,7 @@ async function askForComment(tweetText, character, marketingBrief) {
   ];
   const response = await askllama(messages, {
     temperature: 1,
-    num_predict: 45,
+    num_predict: 35,
   });
   const reply = await filterResponse(response.reply);
   return { reply: reply, endpoint: response.endpoint };
@@ -143,7 +143,7 @@ async function generateCharacter() {
   ];
   const response = await askllama(messages, {
     temperature: 1,
-    num_predict: 45,
+    num_predict: 50,
   });
   const reply = await filterResponse(response.reply);
   return { reply: reply, endpoint: response.endpoint };
