@@ -25,3 +25,4 @@ astrolink-puppeteer-cache
 context.db
 Ford_Xiaomi.db
 astrolink.db
+adapters/twitter/puppeteer_cache_AIC_twitter_archive
