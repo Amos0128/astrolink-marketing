@@ -73,19 +73,25 @@ class Twitter extends Adapter {
   getOptions = () => {
     let revision;
 
-    // Determine the revision based on the operating system
-    switch (os.platform()) {
-      case 'linux':
-        revision = '1398043';
-        break;
-      case 'win32': // Windows
-        revision = '1398050';
-        break;
-      case 'darwin': // macOS
-        revision = '1398047';
-        break;
-      default:
-        throw new Error('Unsupported platform');
+    if (os.platform() === 'darwin') {
+      if (os.arch() === 'arm64') {
+        // Apple Silicon (M1/M2) Mac
+        revision = '1398047'; // Replace with the correct revision number for Mac_Arm
+      } else {
+        // Intel-based Mac
+        revision = '1398623'; // Replace with the correct revision number for Mac
+      }
+    } else {
+      switch (os.platform()) {
+        case 'linux':
+          revision = '1398043';
+          break;
+        case 'win32': // Windows
+          revision = '1398050';
+          break;
+        default:
+          throw new Error('Unsupported platform');
+      }
     }
 
     return {
