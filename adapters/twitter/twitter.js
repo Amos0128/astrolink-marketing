@@ -122,7 +122,7 @@ class Twitter extends Adapter {
       this.browser = await puppeteer.launch({
         executablePath: stats.executablePath, // Dynamic Chromium executablePath
         // executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-        headless: false,
+        // headless: false,
         args: [
           '--disable-blink-features=AutomationControlled',
           '--disable-gpu',
@@ -147,6 +147,11 @@ class Twitter extends Adapter {
       await this.page.setUserAgent(
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       );
+
+      // TEST ONLY
+      // await this.page.goto('https://bot-detector.rebrowser.net/');
+      // await new Promise(resolve => setTimeout(resolve, 1000));
+      // await this.page.screenshot({ path: 'screenshot.png' });
 
       await new Promise(resolve => setTimeout(resolve, 10000));
       await this.twitterLogin(this.page, this.browser);
