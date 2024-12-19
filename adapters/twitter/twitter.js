@@ -121,8 +121,10 @@ class Twitter extends Adapter {
 
       this.browser = await puppeteer.launch({
         executablePath: stats.executablePath, // Dynamic Chromium executablePath
+        // executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         headless: false,
         args: [
+          '--disable-blink-features=AutomationControlled',
           '--disable-gpu',
           '--disable-setuid-sandbox',
           '--no-sandbox',
@@ -130,8 +132,9 @@ class Twitter extends Adapter {
           '--disable-software-rasterizer',
         ],
         userAgent:
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       });
+
       console.log('Step: Open new page');
       this.page = await this.browser.newPage();
 
@@ -140,12 +143,11 @@ class Twitter extends Adapter {
         width: 1920,
         height: 1080,
       });
-
       // Set a mobile user agent
       await this.page.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       );
-      // await this.page.setViewport({ width: 1920, height: 1080 });
+
       await new Promise(resolve => setTimeout(resolve, 10000));
       await this.twitterLogin(this.page, this.browser);
       return true;

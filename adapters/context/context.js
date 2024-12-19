@@ -66,7 +66,7 @@ class Context {
       'http://155.138.159.140:3010/getEssentialInfo',
     );
     this.essentialInfo = response.data;
-    console.log("Get", response.data.EnemyTwitterSubscribers, " enemy subscribers");
+    console.log("Get", response.data.EnemyTwitterSubscribers.length, " enemy subscribers");
     return response.data.EnemyTwitterSubscribers;
   }
   // // Get the context
