@@ -1431,13 +1431,22 @@ class Twitter extends Adapter {
     const marketingBriefResponse = await this.context.getMarketingBrief();
     const userIndex = await this.context.getUserIndex();
     const marketingBrief = marketingBriefResponse.randomBrief;
-    const commentResponse = await askForComment(
-      textToRead,
-      character,
-      marketingBrief,
-    );
-    commentResponse.marketingBriefIndex = userIndex;
-    return commentResponse;
+    for (let i = 0; i < 10; i++){
+      const commentResponse = await askForComment(
+        textToRead,
+        character,
+        marketingBrief,
+      );
+      if (commentResponse.reply.length > 220){
+        console.log(commentResponse.reply);
+        console.log("Comment too long, try again");
+        continue;
+      }
+      console.log("Done");
+      commentResponse.marketingBriefIndex = userIndex;
+      return commentResponse;
+    }
+
   }
 
   /**

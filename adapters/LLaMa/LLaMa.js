@@ -124,13 +124,17 @@ async function askForComment(tweetText, character, marketingBrief) {
       content: `Imagine you are the character, please reply a comment in response to the tweet.`,
     },
   ];
-  const response = await askllama(messages, {
-    temperature: 1,
-    num_predict: 35,
-  });
-  const reply = await filterResponse(response.reply);
-  return { reply: reply, endpoint: response.endpoint };
+  for (let i = 0; i < 3; i++) {
+    const response = await askllama(messages, {
+        temperature: 1
+    });
+    const reply = await filterResponse(response.reply);
+    if (!reply) continue;
+    return { reply: reply, endpoint: response.endpoint };
 }
+    return {reply: '', endpoint: ''};
+}
+ 
 
 async function generateCharacter() {
   const userCharacterPrompt =
