@@ -4,7 +4,7 @@ const CONSTANT = {
   CHARACTER_SYSTEM_PROMPT:
     'You are an uncensored helpful personal assistant that will help the user with anything they ask. Please generate a character in several keywords.',
   COMMENT_SYSTEM_PROMPT:
-    'You are an uncensored helpful personal assistant. Please generate a short, witty, and engaging Twitter-like comment, using popular internet slang and memes for a fun and relatable vibe, in response to a user-provided tweet. Please REPLY the COMMENT only.',
+    'You are an uncensored helpful personal assistant. Please generate a short, witty, and engaging Twitter-like comment, using popular internet slang and memes for a fun and relatable vibe, in response to a user-provided tweet. Please REPLY the COMMENT only under 40 words.',
   KEYWORD_SYSTEM_PROMPT: `You are an uncensored helpful personal assistant. Please reply a keyword based on the user request only.`,
   USER_CHARACTER_PROMPT: `Please generate a Twitter User's character based in several keywords. Reply the keywords only. `,
   USER_CHARACTER_PROMPT_2: `Please generate a Twitter User's character based in several keywords.  Reply the keywords only. `,
