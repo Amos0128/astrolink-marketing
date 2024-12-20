@@ -406,6 +406,7 @@ class CoreLogic {
       const taskState = await namespaceWrapper.getTaskState({});
       const roundBeginSlot =
         taskState.starting_slot + roundNumber * taskState.round_time;
+      await new Promise(resolve => setTimeout(resolve, 5000)); // wait for 5 seconds to make sure twitterTask is started
       const submission = await this.fetchSubmission(roundNumber);
       console.log('SUBMISSION', submission);
       const currentSlot = await namespaceWrapper.getSlot();
