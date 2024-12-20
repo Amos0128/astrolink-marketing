@@ -1699,25 +1699,26 @@ class Twitter extends Adapter {
         }
       }
 
-      await this.clickExploreButton(this.page);
+      // DO NOT FOLLOW USER FOR SAFETY REASON
+      // await this.clickExploreButton(this.page);
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Call the function to perform the slow slide
-      await this.humanLikeScroll(this.page, 300, 5, 10);
+      // // Call the function to perform the slow slide
+      // await this.humanLikeScroll(this.page, 300, 5, 10);
 
-      // Follow user
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // // Follow user
+      // await new Promise(resolve => setTimeout(resolve, 2000));
 
-      await this.clickVerifiedUser(this.page);
+      // await this.clickVerifiedUser(this.page);
 
-      await new Promise(resolve => setTimeout(resolve, 4000));
+      // await new Promise(resolve => setTimeout(resolve, 4000));
 
-      await this.clickFollowButton(this.page);
+      // await this.clickFollowButton(this.page);
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // await new Promise(resolve => setTimeout(resolve, 2000));
 
-      await this.humanLikeScroll(this.page, 300, 5, 10);
+      // await this.humanLikeScroll(this.page, 300, 5, 10);
 
       console.log('Time to take a break');
 
