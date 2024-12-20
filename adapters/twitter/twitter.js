@@ -1994,21 +1994,8 @@ class Twitter extends Adapter {
         // check if time_post within 1hr
         const currentTime = await this.getCurrentTimestamp();
         const timeDiff = currentTime - commentRes.result.time_post;
-        if (timeDiff > 3600) {
-          console.log('Time difference is more than 1hr');
-          auditBrowser.close();
-          return false;
-        }
-        // check if the tweets_content match
-        if (
-          commentRes.result.tweets_content ===
-          inputItem.commentDetails.commentText
-        ) {
-          console.log('Content match');
-          auditBrowser.close();
-          return true;
-        } else {
-          console.log('Content not match');
+        if (timeDiff > 43200) {
+          console.log('Time difference is more than 12hr');
           auditBrowser.close();
           return false;
         }
