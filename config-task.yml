@@ -2,8 +2,8 @@
 task_name: 'AstroLink Marketing'
 author: 'Amos'
 markdownDescriptionPath: ""
-description: "Leverage a powerful AI tool to spotlight the Koii ecosystem by running the AstroLink task. Help more people discover and join our growing community by engaging with targeted audiences and driving awareness through strategic interactions. A secondary X account is suggested to run this task. "
-repositoryUrl: 'https://github.com/Amos0128/test-my-code'
+description: "Leverage a powerful AI tool to spotlight the Koii ecosystem by running the AstroLink task. Help more people discover and join our growing community by engaging with targeted audiences and driving awareness through strategic interactions. A secondary X account is suggested to run this task. Before running the task, please ensure that you visit our discord https://discord.gg/mg3FCNyN and check the detail steps."
+repositoryUrl: 'https://github.com/Amos0128/astrolink-marketing'
 imageUrl: 'https://bafybeid4mlepkytklysae2mkyfj2js4k4sc5j7ctfb4xmhrabyjrwl7u6q.ipfs.w3s.link/Astro.png'
 infoUrl: 'https://astrolink.market/'
 
@@ -30,7 +30,7 @@ bounty_amount_per_round: 100
 allowed_failed_distributions: 3
 
 #Space in MBs for the account size, that holds the task data
-space: 0.1
+space: 3
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
@@ -61,10 +61,10 @@ task_type: "KPL"
 token_type: "6kgpmvSCh6aVNXnCihnrtFYcjLR7pkK6mcLgf3imEC4q"
 
 tags: ['Social Posting', 'AI']
-environment: 'TEST'
+environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: '8RtbwnWXRQ3rChVrHGmucJ2t96BykFv2Di7ByWpPHyeV'
+task_id: 'AsgzJsz26wBckbyW1RwUsFuhocXc8pnaFWjMHJMnipRu'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Improve Performance'
+migrationDescription: 'Solve a bug that rewards are not distributed to the runners.'

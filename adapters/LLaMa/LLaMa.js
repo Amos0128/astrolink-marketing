@@ -19,7 +19,7 @@ async function getEndpoints() {
     'https://vps-tasknet.koii.network/nodes/BozYJz5EpMM8jpHEro4AwkCmp2JtMcMQneHaohJSvLmf',
   );
   const endpointsList = (await endpoints.json()).map(node => node.data.url);
-  console.log(endpointsList);
+  console.log("Get", endpointsList.length, " endpoints");
   for (let i = 0; i < endpointsList.length; i++) {
     // if endpoint contains :5644, we need to make sure it is http:// not https://
     if (endpointsList[i].includes(':5644')) {
@@ -36,6 +36,7 @@ async function askllama(messages, options) {
   // console.log(endpoints);
   // shuffle the endpoints
   const shuffledEndpoints = endpoints.sort(() => Math.random() - 0.5);
+  console.log("Loading Reply...");
   for (let i = 0; i < shuffledEndpoints.length; i++) {
     const randomEndpoint = shuffledEndpoints[i];
     const accessLink =
@@ -55,8 +56,8 @@ async function askllama(messages, options) {
       });
       const data = await response.json();
       const reply = data.reply;
-      console.log('REPLY HERE');
-      console.log(reply);
+      // console.log('REPLY HERE');
+      // console.log(reply);
       if (!reply) continue;
       return { reply: reply, endpoint: randomEndpoint };
     } catch (error) {
@@ -123,13 +124,17 @@ async function askForComment(tweetText, character, marketingBrief) {
       content: `Imagine you are the character, please reply a comment in response to the tweet.`,
     },
   ];
-  const response = await askllama(messages, {
-    temperature: 1,
-    num_predict: 45,
-  });
-  const reply = await filterResponse(response.reply);
-  return { reply: reply, endpoint: response.endpoint };
+  for (let i = 0; i < 3; i++) {
+    const response = await askllama(messages, {
+        temperature: 1
+    });
+    const reply = await filterResponse(response.reply);
+    if (!reply) continue;
+    return { reply: reply, endpoint: response.endpoint };
 }
+    return {reply: '', endpoint: ''};
+}
+ 
 
 async function generateCharacter() {
   const userCharacterPrompt =
@@ -143,7 +148,7 @@ async function generateCharacter() {
   ];
   const response = await askllama(messages, {
     temperature: 1,
-    num_predict: 45,
+    num_predict: 50,
   });
   const reply = await filterResponse(response.reply);
   return { reply: reply, endpoint: response.endpoint };

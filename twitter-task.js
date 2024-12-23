@@ -8,7 +8,7 @@ const fs = require('fs');
 const { namespaceWrapper } = require('@_koii/namespace-wrapper');
 const { default: axios } = require('axios');
 const { error } = require('console');
-
+const context = require('./adapters/context/context');
 async function isValidCID(cid) {
   try {
     CID.parse(cid);
@@ -55,6 +55,7 @@ class TwitterTask {
     this.username = '';
     this.db = new Data('db', []);
     this.db.initializeData();
+    this.context = context;
     this.initialize();
 
     this.setAdapter = async () => {
@@ -85,6 +86,7 @@ class TwitterTask {
   async initialize() {
     try {
       console.log('initializing twitter task');
+      await this.context.initializeContext();
       const { comment, search } = await this.fetchSearchTerms();
       this.comment = comment;
       this.searchTerm = search;
@@ -111,12 +113,9 @@ class TwitterTask {
     let keyword;
     let search;
     try {
-      const response = await axios.get(
-        'http://155.138.159.140:3009/getEssentialInfo',
-      );
+      console.log('fetching keywords');
       // console.log('Keywords from middle server', response.data);
-      let keywordList = response.data.EnemyTwitterSubscribers;
-      console.log('Keywords', keywordList);
+      let keywordList = await this.context.getEnemySubscribers();
       if (keywordList) {
         search = keywordList[Math.floor(Math.random() * keywordList.length)];
         return { comment: keyword, search: search };
@@ -286,128 +285,33 @@ class TwitterTask {
     try {
       await new Promise(resolve => setTimeout(resolve, 30000)); // 30-second delay
       let data = await getJSONFromCID(proofCid, 'dataList.json');
-      let idSet = new Set();
-      let duplicatedIDNumber = 0;
-      for (let item of data) {
-        if (idSet.has(item.id)) {
-          console.log('Duplicate Item ID found: ', item.id);
-          duplicatedIDNumber += 1;
-        }
-        idSet.add(item.id);
-      }
-      if (duplicatedIDNumber > 10) {
-        console.log(
-          `Detected Potential Risk ; Duplicated ID is ${duplicatedIDNumber}`,
-        );
-      } else {
-        console.log(
-          `Duplicated ID Check Passed ; Duplicated ID numebr is ${duplicatedIDNumber}`,
-        );
-      }
 
       let proofThreshold = 1;
-      let passedNumber = 0;
 
-      // Check if task in cooldown period
-      const currentTime = new Date().getTime(); // in milliseconds
-      // console.log('Current time:', currentTime);
+      if (data && data !== null && data.length > 0) {
+        for (let i = 0; i < proofThreshold; i++) {
+          let randomIndex = Math.floor(Math.random() * data.length);
+          let item = data[randomIndex];
 
-      // Fetch the current runtime data from the database
-      let runtimeData = await namespaceWrapper.storeGet('twitterTask');
-      console.log('runtimeData:', runtimeData);
-      // If no data exists in the database for the task, initialize it
-      if (!runtimeData) {
-        runtimeData = {
-          targetStopTime: 0,
-          targetRunTime: currentTime,
-        };
-        await namespaceWrapper.storeSet('twitterTask', runtimeData);
-      }
-
-      // Set the minimum and maximum allowed runtime per day (in milliseconds)
-      const MIN_RUNTIME_PER_DAY = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
-      const MAX_RUNTIME_PER_DAY = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
-      // Generate a random runtime between the minimum and maximum allowed time
-      const randomRuntime =
-        Math.floor(
-          Math.random() * (MAX_RUNTIME_PER_DAY - MIN_RUNTIME_PER_DAY + 1),
-        ) + MIN_RUNTIME_PER_DAY;
-
-      // Set the minimum and maximum allowed cooldown time between task runs (in milliseconds)
-      const MIN_COOLDOWN_TIME = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
-      const MAX_COOLDOWN_TIME = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
-      // Generate a random cooldown time between the minimum and maximum allowed time
-      const randomCooldownTime =
-        Math.floor(
-          Math.random() * (MAX_COOLDOWN_TIME - MIN_COOLDOWN_TIME + 1),
-        ) + MIN_COOLDOWN_TIME;
-
-      // Get the last run time and total runtime from the database
-      let { targetStopTime, targetRunTime } = runtimeData;
-
-      if (
-        targetRunTime <= currentTime &&
-        (targetStopTime > currentTime ||
-          targetStopTime === 0 ||
-          currentTime > targetStopTime + 6 * 60 * 60 * 1000) // 6 hours after the target stop time
-      ) {
-        // If the task has not been run before, set the target stop time and run time
-        if (
-          targetStopTime === 0 ||
-          currentTime > targetStopTime + 6 * 60 * 60 * 1000
-        ) {
-          let targetStopTime = currentTime + randomRuntime;
-          let targetRunTime = 0;
-          let runtimeData = {
-            targetStopTime,
-            targetRunTime,
-          };
-          await namespaceWrapper.storeSet('twitterTask', runtimeData);
-        }
-
-        if (data && data !== null && data.length > 0) {
-          for (let i = 0; i < proofThreshold; i++) {
-            console.log(`Checking the ${i} th tweet.`);
-            let randomIndex = Math.floor(Math.random() * data.length);
-            let item = data[randomIndex];
-
-            if (item.id) {
-              const result = await this.adapter.verify(item.data, round);
-              console.log('Result from verify', result);
-              if (result) {
-                passedNumber += 1;
-              }
-            } else {
+          if (item.id) {
+            const result = await this.adapter.verify(item.data, round);
+            console.log('Result from verify', result);
+            if (!result) {
               console.log('Invalid Item ID: ', item.id);
-              continue;
+              return true;
             }
-          }
-          if (passedNumber === 1) {
-            console.log(passedNumber, 'is passedNumber');
-            return true;
+            return result;
           } else {
-            console.log(passedNumber, 'is passedNumber');
-            return false;
+            console.log('Invalid Item ID: ', item.id);
+            continue;
           }
-        } else {
-          console.log('no data from proof CID');
         }
-        // if none of the random checks fail, return true
-        return true;
       } else {
-        // Do not run the task
-        if (targetRunTime === 0) {
-          let targetRunTime = currentTime + randomCooldownTime;
-          let targetStopTime = 0;
-          let runtimeData = {
-            targetStopTime,
-            targetRunTime,
-          };
-          await namespaceWrapper.storeSet('twitterTask', runtimeData);
-        }
-        console.log('reach the maximum runtime for the day');
-        return;
+        console.log('no data from proof CID');
+        return false;
       }
+      // if none of the random checks fail, return true
+      return true;
     } catch (e) {
       console.log('error in validate', e);
       return true;

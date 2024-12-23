@@ -42,8 +42,8 @@ async function executeTasks() {
     let delay = 1800000;
     let round = i;
     coreLogic.task(round);
-    // await new Promise(resolve => setTimeout(resolve, 3000));
-    // coreLogic.submitTask(round);
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    coreLogic.submitTask(round);
     // await sleep(50000);
 
     // let adapter = new Twitter(credentials, db, 3);
