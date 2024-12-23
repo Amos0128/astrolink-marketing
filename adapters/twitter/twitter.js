@@ -1438,16 +1438,15 @@ class Twitter extends Adapter {
         character,
         marketingBrief,
       );
-      if (commentResponse.reply.length > 220){
+      if (commentResponse.reply.length > 220) {
         console.log(commentResponse.reply);
-        console.log("Comment too long, try again");
+        console.log('Comment too long, try again');
         continue;
       }
-      console.log("Done");
+      console.log('Done');
       commentResponse.marketingBriefIndex = userIndex;
       return commentResponse;
     }
-
   }
 
   /**
@@ -2009,15 +2008,18 @@ class Twitter extends Adapter {
           console.log('Time difference is more than 12hr');
           auditBrowser.close();
           return false;
+        } else {
+          auditBrowser.close();
+          return true;
         }
       } else {
         await new Promise(resolve => setTimeout(resolve, 3000));
         auditBrowser.close();
-        return false;
+        return true;
       }
     } catch (e) {
       console.log('Error fetching single item', e);
-      return false; // Return false in case of an exception
+      return true;
     }
   };
 
