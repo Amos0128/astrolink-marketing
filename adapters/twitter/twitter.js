@@ -1438,7 +1438,7 @@ class Twitter extends Adapter {
         character,
         marketingBrief,
       );
-      if (commentResponse.reply.length > 220) {
+      if (commentResponse.reply.length > 260) {
         console.log(commentResponse.reply);
         console.log('Comment too long, try again');
         continue;

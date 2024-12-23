@@ -2,7 +2,7 @@
 task_name: 'AstroLink Marketing'
 author: 'Amos'
 markdownDescriptionPath: ""
-description: "Leverage a powerful AI tool to spotlight the Koii ecosystem by running the AstroLink task. Help more people discover and join our growing community by engaging with targeted audiences and driving awareness through strategic interactions. A secondary X account is suggested to run this task. Before running the task, please ensure that you visit our discord https://discord.gg/mg3FCNyN and check the detail steps."
+description: "Leverage a powerful AI tool to spotlight the Koii ecosystem by running the AstroLink task. Help more people discover and join our growing community by engaging with targeted audiences and driving awareness through strategic interactions. A secondary X account is suggested to run this task. Before running the task, please ensure that you visit our discord https://discord.gg/SUHMyfndxM and check the detail steps."
 repositoryUrl: 'https://github.com/Amos0128/astrolink-marketing'
 imageUrl: 'https://bafybeid4mlepkytklysae2mkyfj2js4k4sc5j7ctfb4xmhrabyjrwl7u6q.ipfs.w3s.link/Astro.png'
 infoUrl: 'https://astrolink.market/'
@@ -64,7 +64,7 @@ tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AsgzJsz26wBckbyW1RwUsFuhocXc8pnaFWjMHJMnipRu'
+task_id: 'AoW3RDKBiS96BhVkFXjwstFb1wtm7FXggTgS4MbB1NA5'
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Solve a bug that rewards are not distributed to the runners.'
+migrationDescription: 'Update: Fix Marketing brief undefined; Reduce from 40 words to 30 words in Prompt; Change to astrolinkv2.db to make sure Xiaomi is disappered from the character; Max Time of generating comment set to 4 minutes, if 4 min not received from a endpoint then proceed to next one; Metadata for discord updated.'
