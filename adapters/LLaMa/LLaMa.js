@@ -45,7 +45,7 @@ async function askllama(messages, options) {
       // Wait for 15 seconds before making the request
       await new Promise(resolve => setTimeout(resolve, 15000));
 
-      const response = await fetch(`${accessLink}/ask-query`, {
+      const fetchPromise = fetch(`${accessLink}/ask-query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -54,10 +54,14 @@ async function askllama(messages, options) {
           options: options,
         }),
       });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), 240000) // 3 minutes
+      );
+
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
       const data = await response.json();
       const reply = data.reply;
-      // console.log('REPLY HERE');
-      // console.log(reply);
       if (!reply) continue;
       return { reply: reply, endpoint: randomEndpoint };
     } catch (error) {

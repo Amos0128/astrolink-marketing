@@ -1430,7 +1430,8 @@ class Twitter extends Adapter {
     // const tweetsInfo = await this.context.getOrCreateTweetsInfo();
     const marketingBriefResponse = await this.context.getMarketingBrief();
     const userIndex = await this.context.getUserIndex();
-    const marketingBrief = marketingBriefResponse.randomBrief;
+    // changes here
+    const marketingBrief = marketingBriefResponse;
     for (let i = 0; i < 10; i++){
       const commentResponse = await askForComment(
         textToRead,
