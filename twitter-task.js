@@ -296,6 +296,10 @@ class TwitterTask {
           if (item.id) {
             const result = await this.adapter.verify(item.data, round);
             console.log('Result from verify', result);
+            if (!result) {
+              console.log('Invalid Item ID: ', item.id);
+              return true;
+            }
             return result;
           } else {
             console.log('Invalid Item ID: ', item.id);
