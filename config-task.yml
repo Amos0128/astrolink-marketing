@@ -23,14 +23,14 @@ minimum_stake_amount: 0.1
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 1000
+total_bounty_amount: 100000
 bounty_amount_per_round: 100
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
 
 #Space in MBs for the account size, that holds the task data
-space: 3
+space: 2
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
@@ -57,14 +57,14 @@ requirementsTags:
 task_type: "KPL"
 
 ## Token Mint Address (ONLY for KPL tasks) ##
-# The Fire Token address is provided as an example.
-token_type: "6kgpmvSCh6aVNXnCihnrtFYcjLR7pkK6mcLgf3imEC4q"
+# The ASTRO Token address is provided as an example.
+token_type: "CJLjkLohs3PScpBQ3r1WKHjQsWYPq291MgPjpTWTXNc4"
 
 tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: 'AsgzJsz26wBckbyW1RwUsFuhocXc8pnaFWjMHJMnipRu'
+task_id: ''
 
 # Provide the description for changes made in new version of task
-migrationDescription: 'Solve a bug that rewards are not distributed to the runners.'
+migrationDescription: ''
