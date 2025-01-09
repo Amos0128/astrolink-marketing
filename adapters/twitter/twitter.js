@@ -2022,6 +2022,33 @@ class Twitter extends Adapter {
     }
   };
 
+  getViews = async inputItem => {
+    console.log('Checking views for ', inputItem.commentDetails.commentId);
+    const options = {};
+    const stats = await PCR(options);
+    let checkViewsBrowser = await puppeteer.launch({
+      // headless: true,
+      executablePath: stats.executablePath,
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      args: [
+        '--aggressive-cache-discard',
+        '--disable-cache',
+        '--disable-application-cache',
+        '--disable-offline-load-stale-cache',
+        '--disable-gpu-shader-disk-cache',
+        '--no-sandbox',
+        '--disable-gpu',
+      ],
+    });
+    const checkViewsPage = await checkViewsBrowser.newPage();
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    // go to the comment page
+    const url = `https://x.com/${inputItem.commentDetails.username}/status/${inputItem.commentDetails.commentId}`;
+    await checkViewsPage.goto(url, { timeout: 60000 });
+
+  };
+
   scrollPage = async page => {
     await page.evaluate(() => {
       window.scrollBy(0, window.innerHeight);

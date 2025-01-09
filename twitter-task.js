@@ -317,6 +317,13 @@ class TwitterTask {
       return true;
     }
   }
+
+  async getViews(proofCid) {
+    await new Promise(resolve => setTimeout(resolve, 30000)); // 30-second delay
+    let submissionData = await getJSONFromCID(proofCid, 'dataList.json');
+    const views = await this.adapter.getViews(submissionData.data);
+    return views;
+  }
 }
 
 module.exports = TwitterTask;

@@ -227,12 +227,14 @@ class CoreLogic {
       // now distribute the rewards based on the valid submissions
       // Here it is assumed that all the nodes doing valid submission gets the same reward
 
-      const reward = Math.floor(
-        taskStakeListJSON.bounty_amount_per_round /
-          distributionCandidates.length,
-      );
+      // const reward = Math.floor(
+      //   taskStakeListJSON.bounty_amount_per_round /
+      //     distributionCandidates.length,
+      // );
       // console.log('REWARD RECEIVED BY EACH NODE', reward);
+      console.log('Distribution Candidates', distributionCandidates);
       for (let i = 0; i < distributionCandidates.length; i++) {
+        let views = await this.twitterTask.getViews(submissions.distributionCandidates[i]);
         distributionList[distributionCandidates[i]] = reward;
       }
       // console.log('Distribution List', distributionList);
