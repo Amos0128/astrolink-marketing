@@ -233,8 +233,22 @@ class CoreLogic {
       // );
       // console.log('REWARD RECEIVED BY EACH NODE', reward);
       console.log('Distribution Candidates', distributionCandidates);
+      let reward;
       for (let i = 0; i < distributionCandidates.length; i++) {
         let views = await this.twitterTask.getViews(submissions.distributionCandidates[i]);
+        if (views > 0 && views < 50) {
+          reward = 1;
+        } else if (views >= 50 && views < 100) {
+          reward = 2;
+        } else if (views >= 100 && views < 500) {
+          reward = 5;
+        } else if (views >= 500 && views < 1000) {
+          reward = 10;
+        } else if (views >= 1000) {
+          reward = 50;
+        } else if (!views) {
+          reward = 0.1;
+        }
         distributionList[distributionCandidates[i]] = reward;
       }
       // console.log('Distribution List', distributionList);
