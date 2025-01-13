@@ -2023,6 +2023,7 @@ class Twitter extends Adapter {
   };
 
   getViews = async inputItem => {
+    try {
     console.log('Checking views for ', inputItem.commentDetails.commentId);
     const options = {};
     const stats = await PCR(options);
@@ -2045,8 +2046,38 @@ class Twitter extends Adapter {
     await new Promise(resolve => setTimeout(resolve, 3000));
     // go to the comment page
     const url = `https://x.com/${inputItem.commentDetails.username}/status/${inputItem.commentDetails.commentId}`;
-    await checkViewsPage.goto(url, { timeout: 60000 });
 
+    await checkViewsPage.goto(url, { timeout: 60000 });
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // check if the page gave 404
+      let confirmed_no_tweet = false;
+      await checkViewsPage.evaluate(() => {
+        if (document.querySelector('[data-testid="error-detail"]')) {
+          console.log('Error detail found');
+          confirmed_no_tweet = true;
+        }
+      });
+      if (confirmed_no_tweet) {
+        return false;
+      }
+      console.log('Retrieve item for', url);
+      const commentRes = await this.retrieveItem(
+        checkViewsPage,
+        inputItem.commentDetails.commentText,
+        'commentPage',
+      );
+      let views;
+      if (commentRes) {
+        views = commentRes.result.views;
+      } else {
+        views = 1;
+      }
+      return views;
+    } catch (e) {
+      console.log('Error fetching single item', e);
+      return 1;
+    }
   };
 
   scrollPage = async page => {
