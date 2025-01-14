@@ -147,8 +147,9 @@ class CoreLogic {
       let taskAccountDataJSON = null;
       let taskStakeListJSON = null;
       try {
-        taskAccountDataJSON =
-          await namespaceWrapper.getTaskSubmissionInfo(round);
+        taskAccountDataJSON = await namespaceWrapper.getTaskSubmissionInfo(
+          round,
+        );
       } catch (error) {
         console.error('ERROR IN FETCHING TASK SUBMISSION DATA', error);
         return distributionList;
@@ -235,7 +236,9 @@ class CoreLogic {
       console.log('Distribution Candidates', distributionCandidates);
       let reward;
       for (let i = 0; i < distributionCandidates.length; i++) {
-        let views = await this.twitterTask.getViews(submissions.distributionCandidates[i]);
+        let views = await this.twitterTask.getViews(
+          submissions.distributionCandidates[i],
+        );
         if (views > 0 && views < 50) {
           reward = 1;
         } else if (views >= 50 && views < 100) {
