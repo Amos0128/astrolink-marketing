@@ -50,7 +50,7 @@ class Context {
     if (this.essentialInfo == null){
       return "Please generate a funny interesting comment!"
     }
-    return this.essentialInfo.MarketBrief;
+    return this.essentialInfo.marketingBrief;
   }
 
   async getUserIndex(){
@@ -68,6 +68,16 @@ class Context {
     this.essentialInfo = response.data;
     console.log("Get", response.data.EnemyTwitterSubscribers.length, " enemy subscribers");
     return response.data.EnemyTwitterSubscribers;
+  }
+
+  async getEssentialInfo(){
+    console.log("getEssentialInfo called")
+    const response = await axios.get(
+      'http://155.138.159.140:3011/getEssentialInfo',
+    );
+    this.essentialInfo = response.data;
+    // console.log("Get", response.data.EnemyTwitterSubscribers.length, " enemy subscribers");
+    return response.data;
   }
   // // Get the context
   // async getContext(){

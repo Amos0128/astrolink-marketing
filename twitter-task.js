@@ -115,8 +115,10 @@ class TwitterTask {
     try {
       console.log('fetching keywords');
       // console.log('Keywords from middle server', response.data);
-      let keywordList = await this.context.getEnemySubscribers();
-      if (keywordList) {
+      let mission = await this.context.getEssentialInfo();
+      console.log("*****Get Mission From Server********",mission);
+      if (mission && mission.type === 1) {
+        
         search = keywordList[Math.floor(Math.random() * keywordList.length)];
         return { comment: keyword, search: search };
       } else {
@@ -156,7 +158,7 @@ class TwitterTask {
         return { comment: keyword, search: search };
       }
     } catch (error) {
-      console.log('Error fetching keywords:', error, 'use random keyword');
+      console.log('Error fetching mission:', error, 'use backup mission');
       // pick random search term
       let searchList = [
         '"mendozabills"',
