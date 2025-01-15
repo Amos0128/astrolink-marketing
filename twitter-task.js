@@ -110,7 +110,6 @@ class TwitterTask {
    * @returns {array} - an array of search terms
    */
   async fetchSearchTerms() {
-    let keyword;
     let search;
     try {
       console.log('fetching keywords');
@@ -118,84 +117,20 @@ class TwitterTask {
       let mission = await this.context.getEssentialInfo();
       console.log("*****Get Mission From Server********",mission);
       if (mission && mission.type === 1) {
-        
-        search = keywordList[Math.floor(Math.random() * keywordList.length)];
-        return { comment: keyword, search: search };
+        search = mission.Keywords[Math.floor(Math.random() * mission.Keywords.length)];
+        return { type: mission.type, search: search, action: mission.action };
+      } else if (mission && mission.type === 2) {
+        search = mission.TwitterUsername[Math.floor(Math.random() * mission.TwitterUsername.length)];
+        return { type: mission.type, search: search, action: mission.action };
+      } else if (mission && mission.type === 3) {
+        search = mission.TweetsID[Math.floor(Math.random() * mission.TweetsID.length)];
+        return { type: mission.type, search: search, action: mission.action };
       } else {
-        let searchList = [
-          '"mendozabills"',
-          '"Samuelodumtwit"',
-          '"AndreiDamian0"',
-          '"gialong4446"',
-          '"AlexVillargordo"',
-          '"rafalgolarz"',
-          '"thomas22xx"',
-          '"Mr_Shaisob91275"',
-          '"abdusemedk51"',
-          '"usmannitel45"',
-          '"m_shizan67041"',
-          '"BiniyamShi92265"',
-          '"westham2435"',
-          '"M_Shakib553039"',
-          '"mst_israt53729"',
-          '"Mr_Humayun_"',
-          '"golden_cry"',
-          '"Silvanachu014"',
-          '"SergeiKudinov1"',
-          '"BogaleChekole"',
-          '"hahai87431558"',
-          '"Anggi_Frimadani"',
-          '"Bintuu14"',
-          '"kalagi_sur1062"',
-          '"Modzodzo1"',
-          '"pngjn4119879521"',
-          '"_habib_ullah"',
-          '"0xpreston_"',
-          '"B_Bbristry"',
-          '"JMarco28006338"',
-        ]; // User name
-        search = searchList[Math.floor(Math.random() * searchList.length)];
-        return { comment: keyword, search: search };
+        return { type: 1, search: 'Koii', action: [1] };
       }
     } catch (error) {
-      console.log('Error fetching mission:', error, 'use backup mission');
-      // pick random search term
-      let searchList = [
-        '"mendozabills"',
-        '"Samuelodumtwit"',
-        '"AndreiDamian0"',
-        '"gialong4446"',
-        '"AlexVillargordo"',
-        '"rafalgolarz"',
-        '"thomas22xx"',
-        '"Mr_Shaisob91275"',
-        '"abdusemedk51"',
-        '"usmannitel45"',
-        '"m_shizan67041"',
-        '"BiniyamShi92265"',
-        '"westham2435"',
-        '"M_Shakib553039"',
-        '"mst_israt53729"',
-        '"Mr_Humayun_"',
-        '"golden_cry"',
-        '"Silvanachu014"',
-        '"SergeiKudinov1"',
-        '"BogaleChekole"',
-        '"hahai87431558"',
-        '"Anggi_Frimadani"',
-        '"Bintuu14"',
-        '"kalagi_sur1062"',
-        '"Modzodzo1"',
-        '"pngjn4119879521"',
-        '"_habib_ullah"',
-        '"0xpreston_"',
-        '"B_Bbristry"',
-        '"JMarco28006338"',
-      ]; // User name
-      search = searchList[Math.floor(Math.random() * searchList.length)];
+      return { type: 1, search: 'Koii', action: [1] };
     }
-
-    return { comment: keyword, search: search };
   }
 
   /**
