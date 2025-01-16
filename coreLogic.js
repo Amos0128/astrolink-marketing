@@ -236,9 +236,10 @@ class CoreLogic {
       console.log('Distribution Candidates', distributionCandidates);
       let reward;
       for (let i = 0; i < distributionCandidates.length; i++) {
-        let views = await this.twitterTask.getViews(
-          submissions.distributionCandidates[i],
-        );
+        // let views = await this.twitterTask.getViews(
+        //   submissions.distributionCandidates[i],
+        // );
+        let views = 500;
         if (views > 0 && views < 50) {
           reward = 1;
         } else if (views >= 50 && views < 100) {

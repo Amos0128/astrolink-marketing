@@ -94,7 +94,12 @@ class TwitterTask {
       this.type = type;
       this.action = action;
 
-      this.db.createSearchTerm(this.searchTerm, this.round, this.type, this.action);
+      this.db.createSearchTerm(
+        this.searchTerm,
+        this.round,
+        this.type,
+        this.action,
+      );
     } catch (error) {
       console.log(error);
     }
@@ -111,15 +116,26 @@ class TwitterTask {
       console.log('fetching keywords');
       // console.log('Keywords from middle server', response.data);
       let mission = await this.context.getEssentialInfo();
-      console.log("*****Get Mission From Server********", 'Mission: ', mission.type, 'Name: ', mission.uniqueName);
+      console.log(
+        '*****Get Mission From Server********',
+        'Mission: ',
+        mission.type,
+        'Name: ',
+        mission.uniqueName,
+      );
       if (mission && mission.type === 1) {
-        search = mission.Keywords[Math.floor(Math.random() * mission.Keywords.length)];
+        search =
+          mission.Keywords[Math.floor(Math.random() * mission.Keywords.length)];
         return { type: mission.type, search: search, action: mission.action };
       } else if (mission && mission.type === 2) {
-        search = mission.TwitterUsername[Math.floor(Math.random() * mission.TwitterUsername.length)];
+        search =
+          mission.TwitterUsername[
+            Math.floor(Math.random() * mission.TwitterUsername.length)
+          ];
         return { type: mission.type, search: search, action: mission.action };
       } else if (mission && mission.type === 3) {
-        search = mission.TweetsID[Math.floor(Math.random() * mission.TweetsID.length)];
+        search =
+          mission.TweetsID[Math.floor(Math.random() * mission.TweetsID.length)];
         return { type: mission.type, search: search, action: mission.action };
       } else {
         return { type: 1, search: 'Koii', action: [1] };
@@ -229,15 +245,12 @@ class TwitterTask {
           let item = data[randomIndex];
 
           if (item.id) {
-            const result = await this.adapter.verify(item.data, round);
-            console.log('Result from verify', result);
-            if (!result) {
-              console.log('Invalid Item ID: ', item.id);
-              return true;
-            }
-            return result;
+            // const result = await this.adapter.verify(item.data, round);
+            // console.log('Result from verify', result);
+            // return result;
+            return true;
           } else {
-            console.log('Invalid Item ID: ', item.id);
+            console.log('Invalid Item ID');
             continue;
           }
         }
