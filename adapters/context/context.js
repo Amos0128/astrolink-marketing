@@ -73,7 +73,7 @@ class Context {
   async getEssentialInfo(){
     console.log("getEssentialInfo called")
     const response = await axios.get(
-      'http://155.138.159.140:3011/getEssentialInfo?index=1',
+      'http://155.138.159.140:3011/getEssentialInfo?index=0',
     );
     this.essentialInfo = response.data;
     // console.log("Get", response.data.EnemyTwitterSubscribers.length, " enemy subscribers");
