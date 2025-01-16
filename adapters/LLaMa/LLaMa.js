@@ -16,7 +16,7 @@ async function getEndpoints() {
     return ['http://localhost:4628'];
   }
   const endpoints = await fetch(
-    'https://vps-tasknet.koii.network/nodes/BozYJz5EpMM8jpHEro4AwkCmp2JtMcMQneHaohJSvLmf',
+    'https://vps-tasknet.koii.network/nodes/9yXSpfG4LDDa74zuQSw28RHAKjpQdScEqVmd7eDhXrp',
   );
   const endpointsList = (await endpoints.json()).map(node => node.data.url);
   console.log("Get", endpointsList.length, " endpoints");
@@ -40,7 +40,7 @@ async function askllama(messages, options) {
   for (let i = 0; i < shuffledEndpoints.length; i++) {
     const randomEndpoint = shuffledEndpoints[i];
     const accessLink =
-      randomEndpoint + '/task/BozYJz5EpMM8jpHEro4AwkCmp2JtMcMQneHaohJSvLmf';
+      randomEndpoint + '/task/9yXSpfG4LDDa74zuQSw28RHAKjpQdScEqVmd7eDhXrp';
     try {
       // Wait for 15 seconds before making the request
       await new Promise(resolve => setTimeout(resolve, 15000));
@@ -66,7 +66,7 @@ async function askllama(messages, options) {
   }
   //if no reply from any endpoint, try the default one
   const accessLink =
-    'https://vps-tasknet.koii.network/task/BozYJz5EpMM8jpHEro4AwkCmp2JtMcMQneHaohJSvLmf';
+    'https://vps-tasknet.koii.network/task/9yXSpfG4LDDa74zuQSw28RHAKjpQdScEqVmd7eDhXrp';
   const response = await fetch(`${accessLink}/ask-query`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
