@@ -50,6 +50,8 @@ class TwitterTask {
     this.lastRoundCheck = Date.now();
     this.isRunning = false;
     this.searchTerm = [];
+    this.type;
+    this.action;
     this.adapter = null;
     this.comment = '';
     this.username = '';
@@ -87,18 +89,12 @@ class TwitterTask {
     try {
       console.log('initializing twitter task');
       await this.context.initializeContext();
-      const { comment, search } = await this.fetchSearchTerms();
-      this.comment = comment;
+      const { type, search, action } = await this.fetchSearchTerms();
       this.searchTerm = search;
+      this.type = type;
+      this.action = action;
 
-      //Store this round searchTerm
-      // console.log(
-      //   'creating crawler for user:',
-      //   this.searchTerm,
-      //   this.round,
-      //   this.comment,
-      // );
-      this.db.createSearchTerm(this.searchTerm, this.round, this.comment);
+      this.db.createSearchTerm(this.searchTerm, this.round, this.type, this.action);
     } catch (error) {
       console.log(error);
     }
@@ -115,7 +111,7 @@ class TwitterTask {
       console.log('fetching keywords');
       // console.log('Keywords from middle server', response.data);
       let mission = await this.context.getEssentialInfo();
-      console.log("*****Get Mission From Server********",mission);
+      console.log("*****Get Mission From Server********", 'Mission: ', mission.type, 'Name: ', mission.uniqueName);
       if (mission && mission.type === 1) {
         search = mission.Keywords[Math.floor(Math.random() * mission.Keywords.length)];
         return { type: mission.type, search: search, action: mission.action };
@@ -166,6 +162,8 @@ class TwitterTask {
     let query = {
       limit: 100,
       searchTerm: this.searchTerm,
+      type: this.type,
+      action: this.action,
       query: `https://x.com/search?q=${this.searchTerm}&src=typed_query&f=live`,
       comment: `${this.comment} ${getRandomEmojis}  ${selectedHashtags}`,
       depth: 3,

@@ -39,6 +39,8 @@ class Twitter extends Adapter {
     this.commentsDB = new Data('comment', []);
     this.commentsDB.initializeData();
     this.searchTerm = [];
+    this.type;
+    this.action;
     this.lastSessionCheck = null;
     this.sessionValid = false;
     this.browser = null;
@@ -1485,6 +1487,8 @@ class Twitter extends Adapter {
       this.searchTerm = query.searchTerm;
       this.round = query.round;
       this.comment = query.comment;
+      this.type = query.type;
+      this.action = query.action;
 
       // check if the input is email or not
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -1608,6 +1612,7 @@ class Twitter extends Adapter {
         );
         return;
       }
+      console.log("Now running job", this.type, "Action", this.action);
       await new Promise(resolve => setTimeout(resolve, 10000));
       console.log('Go to search page');
 
@@ -1626,40 +1631,45 @@ class Twitter extends Adapter {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // await this.clickLatest(this.page);
-      await this.clickPeople(this.page);
+      if (this.type === 2) {
+        // Check User if type is 2
+        // await this.clickLatest(this.page);
+        await this.clickPeople(this.page);
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-      console.log('fetching list for ', this.page.url());
+        console.log('fetching list for ', this.page.url());
 
-      // error message
-      const errorMessage = await this.page.evaluate(() => {
-        const elements = document.querySelectorAll('div[dir="ltr"]');
-        for (let element of elements) {
-          // console.log(element.textContent);
-          if (element.textContent === 'Something went wrong. Try reloading.') {
-            return true;
+        // error message
+        const errorMessage = await this.page.evaluate(() => {
+          const elements = document.querySelectorAll('div[dir="ltr"]');
+          for (let element of elements) {
+            // console.log(element.textContent);
+            if (
+              element.textContent === 'Something went wrong. Try reloading.'
+            ) {
+              return true;
+            }
           }
+          return false;
+        });
+
+        if (errorMessage) {
+          console.log('Something went wrong, please check your account');
+          this.browser.close();
         }
-        return false;
-      });
 
-      if (errorMessage) {
-        console.log('Something went wrong, please check your account');
-        this.browser.close();
+        console.log('Waiting for tweets loaded');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // get the users
+        await this.page.evaluate(() => {
+          const elements = document.querySelectorAll(
+            'button[data-testid="UserCell"]',
+          );
+          elements.forEach(element => element.click());
+        });
       }
-
-      console.log('Waiting for tweets loaded');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // get the users
-      await this.page.evaluate(() => {
-        const elements = document.querySelectorAll(
-          'button[data-testid="UserCell"]',
-        );
-        elements.forEach(element => element.click());
-      });
 
       await new Promise(resolve => setTimeout(resolve, 4500));
 
