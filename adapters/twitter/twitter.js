@@ -1249,74 +1249,81 @@ class Twitter extends Adapter {
 
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // // Click like button (now unused)
-      // const commentContainer = await this.getCommentContainer(
-      //   currentPage,
-      //   tweet_text,
-      // );
-      // if (commentContainer) {
-      //   let currentUrl = currentPage.url();
-      //   await this.clickLikeButton(currentPage, commentContainer);
+      if (this.action.includes(1)) {
+        // Click like button
+        const commentContainer = await this.getCommentContainer(
+          currentPage,
+          tweet_text,
+        );
+        if (commentContainer) {
+          let currentUrl = currentPage.url();
+          await this.clickLikeButton(currentPage, commentContainer);
 
-      //   // check if url changed
-      //   if (currentUrl !== currentPage.url()) {
-      //     console.log(
-      //       'Url changed after like action. Changed to:',
-      //       currentPage.url(),
-      //     );
-      //     return false;
-      //   } else {
-      //     console.log('Like action performed successfully.');
-      //   }
-      // } else {
-      //   console.log('Comment container not found for the tweet.');
-      // }
-
-      //       await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Check if already posted the comment
-      let isAlreadComment = false;
-      // Fetch the current comments
-      const existComments = await currentPage.evaluate(() => {
-        const elements = document.querySelectorAll('article[aria-labelledby]');
-        return Array.from(elements).map(element => element.outerHTML);
-      });
-
-      let commentDetails = {};
-      for (const comment of existComments) {
-        const $ = cheerio.load(comment);
-
-        // Find the href for the username inside each individual comment
-        const linkElement = $('a[tabindex="-1"]');
-        const href = linkElement.attr('href'); // Get the href attribute value
-
-        if (href) {
-          const user_name = href.replace('/', '').trim(); // Remove leading slash
-
-          // console.log('user_name:', user_name);
-
-          if (user_name === this.username) {
-            console.log('Already posted the comment');
-            isAlreadComment = true;
-            break;
+          // check if url changed
+          if (currentUrl !== currentPage.url()) {
+            console.log(
+              'Url changed after like action. Changed to:',
+              currentPage.url(),
+            );
+            return false;
+          } else {
+            console.log('Like action performed successfully.');
           }
+        } else {
+          console.log('Comment container not found for the tweet.');
         }
       }
 
-      // check comment cooldown
-      const currentTimeStamp = await this.getCurrentTimestamp(); // Fetch the current timestamp
-      let isTimestampValid = await this.checkCommentTimestamp(currentTimeStamp);
-      console.log('isTimestampValid', isTimestampValid);
-      if (isTimestampValid && !isAlreadComment) {
-        // Click the comment button if the timestamp check is valid
-        commentDetails = await this.clickCommentButton(
-          currentPage,
-          tweets_content,
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      let commentDetails = {};
+      if (this.action.includes(2)) {
+        // Check if already posted the comment
+        let isAlreadComment = false;
+        // Fetch the current comments
+        const existComments = await currentPage.evaluate(() => {
+          const elements = document.querySelectorAll(
+            'article[aria-labelledby]',
+          );
+          return Array.from(elements).map(element => element.outerHTML);
+        });
+
+        for (const comment of existComments) {
+          const $ = cheerio.load(comment);
+
+          // Find the href for the username inside each individual comment
+          const linkElement = $('a[tabindex="-1"]');
+          const href = linkElement.attr('href'); // Get the href attribute value
+
+          if (href) {
+            const user_name = href.replace('/', '').trim(); // Remove leading slash
+
+            // console.log('user_name:', user_name);
+
+            if (user_name === this.username) {
+              console.log('Already posted the comment');
+              isAlreadComment = true;
+              break;
+            }
+          }
+        }
+
+        // check comment cooldown
+        const currentTimeStamp = await this.getCurrentTimestamp(); // Fetch the current timestamp
+        let isTimestampValid = await this.checkCommentTimestamp(
+          currentTimeStamp,
         );
-        console.log('commentDetails', commentDetails);
-        console.log('Comment action performed, and timestamp updated.');
-      } else {
-        console.log('No comment action was taken due to recent activity.');
+        console.log('isTimestampValid', isTimestampValid);
+        if (isTimestampValid && !isAlreadComment) {
+          // Click the comment button if the timestamp check is valid
+          commentDetails = await this.clickCommentButton(
+            currentPage,
+            tweets_content,
+          );
+          console.log('commentDetails', commentDetails);
+          console.log('Comment action performed, and timestamp updated.');
+        } else {
+          console.log('No comment action was taken due to recent activity.');
+        }
       }
 
       try {
@@ -1386,7 +1393,7 @@ class Twitter extends Adapter {
         console.log('Something went wrong when performing Like action', e);
       }
 
-      if (screen_name && tweet_text && commentDetails.commentId) {
+      if (screen_name) {
         data = {
           user_name: user_name,
           screen_name: screen_name,
@@ -1612,7 +1619,7 @@ class Twitter extends Adapter {
         );
         return;
       }
-      console.log("Now running job", this.type, "Action", this.action);
+      console.log('Now running job', this.type, 'Action', this.action);
       await new Promise(resolve => setTimeout(resolve, 10000));
       console.log('Go to search page');
 
