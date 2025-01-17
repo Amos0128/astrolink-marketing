@@ -1,5 +1,5 @@
 # Name and metadata of your task
-task_name: 'AstroLink Marketing'
+task_name: 'AstroLink - Cryptoknight'
 author: 'Amos'
 markdownDescriptionPath: ""
 description: "Leverage a powerful AI tool to spotlight the Koii ecosystem by running the AstroLink task. Help more people discover and join our growing community by engaging with targeted audiences and driving awareness through strategic interactions. A secondary X account is suggested to run this task. Before running the task, please ensure that you visit our discord https://discord.gg/mg3FCNyN and check the detail steps."
@@ -23,14 +23,14 @@ minimum_stake_amount: 0.1
 
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
-total_bounty_amount: 100000
-bounty_amount_per_round: 100
+total_bounty_amount: 10000
+bounty_amount_per_round: 1000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
-allowed_failed_distributions: 3
+allowed_failed_distributions: 1
 
 #Space in MBs for the account size, that holds the task data
-space: 2
+space: 0.1
 
 # Note that the value field in RequirementTag is optional, so it is up to you to include it or not based on your use case.
 # To add more global variables and task variables, please refer the type,value,description format shown below
@@ -61,7 +61,7 @@ task_type: "KPL"
 token_type: "CJLjkLohs3PScpBQ3r1WKHjQsWYPq291MgPjpTWTXNc4"
 
 tags: ['Social Posting', 'AI']
-environment: 'PRODUCTION'
+environment: 'TEST'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
 task_id: ''
