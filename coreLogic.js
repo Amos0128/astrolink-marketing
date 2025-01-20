@@ -253,7 +253,7 @@ class CoreLogic {
         } else if (!views) {
           reward = 0.1;
         }
-        distributionList[distributionCandidates[i]] = reward;
+        distributionList[distributionCandidates[i]] = reward * 1000000000;
       }
       // console.log('Distribution List', distributionList);
       return distributionList;

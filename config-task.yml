@@ -1,8 +1,8 @@
 # Name and metadata of your task
-task_name: 'AstroLink Marketing'
+task_name: 'Astrolink <> Koii'
 author: 'Amos'
-markdownDescriptionPath: ""
-description: "Leverage a powerful AI tool to spotlight the Koii ecosystem by running the AstroLink task. Help more people discover and join our growing community by engaging with targeted audiences and driving awareness through strategic interactions. A secondary X account is suggested to run this task. Before running the task, please ensure that you visit our discord https://discord.gg/mg3FCNyN and check the detail steps."
+markdownDescriptionPath: "./TaskDescription.md"
+description: "Leverage a powerful AI tool for a task specifically designed for the Koii ecosystem — the AstroLink task. Help more people discover and join our growing community by strategically engaging with targeted audiences and increasing awareness about Koii. It’s recommended to run this task with a secondary X account. Before starting, make sure to visit our Discord (https://discord.gg/SUHMyfndxM) and review the detailed steps."
 repositoryUrl: 'https://github.com/Amos0128/astrolink-marketing'
 imageUrl: 'https://bafybeid4mlepkytklysae2mkyfj2js4k4sc5j7ctfb4xmhrabyjrwl7u6q.ipfs.w3s.link/Astro.png'
 infoUrl: 'https://astrolink.market/'
@@ -24,7 +24,7 @@ minimum_stake_amount: 0.1
 # total_bounty_amount cannot be grater than bounty_amount_per_round
 # total bounty is not accepted in case of update task
 total_bounty_amount: 100000
-bounty_amount_per_round: 100
+bounty_amount_per_round: 10000
 
 #Number of times allowed to re-submit the distribution  list in case the distribution list is audited
 allowed_failed_distributions: 3
@@ -64,7 +64,7 @@ tags: ['Social Posting', 'AI']
 environment: 'PRODUCTION'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: ''
+task_id: '6fVwr2WrF7vrK32TSxNZTGR9W8RKNFAyDwsB7QFSY5JJ'
 
 # Provide the description for changes made in new version of task
-migrationDescription: ''
+migrationDescription: 'Fix several bugs and improve the performance of the task. Implement a new feature to increase the efficiency of the task.'
