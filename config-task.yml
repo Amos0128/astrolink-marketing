@@ -64,7 +64,7 @@ tags: ['Social Posting', 'AI']
 environment: 'TEST'
 
 # OPTIONAL Only provide the taskId if you are updating the task otherwise leave blank
-task_id: ''
+task_id: 'AJrui23bRfvVWi5zBZfJNRBxhG2mTH5q4hJD4T6PC3YY'
 
 # Provide the description for changes made in new version of task
-migrationDescription: ''
+migrationDescription: 'Fix reward amount'
