@@ -11,12 +11,24 @@ async function filterResponse(text) {
   const filteredText = text.replace(/"/g, '');
   return filteredText;
 }
-async function getEndpoints() {
+
+async function getTaskID() {
+  try {
+    const taskID = (await axios.get(
+      'http://155.138.159.140:3011/getLLMTaskID',
+    )).data || '8JEYBpXFgYx4iEWNsL1SD7m1RS6VdfrFq7nNY2rfUhTk';
+    return taskID;
+  } catch (error) {
+    console.log(error);
+    return '8JEYBpXFgYx4iEWNsL1SD7m1RS6VdfrFq7nNY2rfUhTk';
+  }
+}
+async function getEndpoints(taskID) {
   if (process.env.DEV_MODE === 'true') {
     return ['http://localhost:4628'];
-  }
+  } 
   const endpoints = await fetch(
-    'https://vps-tasknet.koii.network/nodes/9yXSpfG4LDDa74zuQSw28RHAKjpQdScEqVmd7eDhXrp',
+    `https://vps-tasknet.koii.network/nodes/${taskID}`,
   );
   const endpointsList = (await endpoints.json()).map(node => node.data.url);
   console.log("Get", endpointsList.length, " endpoints");
@@ -31,8 +43,10 @@ async function getEndpoints() {
   return endpointsList;
 }
 async function askllama(messages, options) {
+
+  const taskID = await getTaskID();
   console.log('messages', messages);
-  const endpoints = await getEndpoints();
+  const endpoints = await getEndpoints(taskID);
   // console.log(endpoints);
   // shuffle the endpoints
   const shuffledEndpoints = endpoints.sort(() => Math.random() - 0.5);
@@ -40,7 +54,7 @@ async function askllama(messages, options) {
   for (let i = 0; i < shuffledEndpoints.length; i++) {
     const randomEndpoint = shuffledEndpoints[i];
     const accessLink =
-      randomEndpoint + '/task/9yXSpfG4LDDa74zuQSw28RHAKjpQdScEqVmd7eDhXrp';
+      randomEndpoint + `/task/${taskID}`;
     try {
       // Wait for 15 seconds before making the request
       await new Promise(resolve => setTimeout(resolve, 15000));
@@ -66,7 +80,7 @@ async function askllama(messages, options) {
   }
   //if no reply from any endpoint, try the default one
   const accessLink =
-    'https://vps-tasknet.koii.network/task/9yXSpfG4LDDa74zuQSw28RHAKjpQdScEqVmd7eDhXrp';
+    `https://vps-tasknet.koii.network/task/${taskID}`;
   const response = await fetch(`${accessLink}/ask-query`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
